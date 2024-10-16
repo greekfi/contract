@@ -1,16 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import abi from "./OptionManager.json"
-const erc20abi = [
-  "function balanceOf(address owner) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)",
+import {abi} from "./OptionManager.json"
+import erc20abi from "./erc20abi.json"
+// const erc20abi = [
+//   "function balanceOf(address owner) view returns (uint256)",
+//   "function decimals() view returns (uint8)",
+//   "function symbol() view returns (string)",
 
-  "function transfer(address to, uint amount) returns (bool)",
+//   "function transfer(address to, uint amount) returns (bool)",
 
-  "event Transfer(address indexed from, address indexed to, uint amount)"
-];
+//   "event Transfer(address indexed from, address indexed to, uint amount)"
+// ];
 
 const ERC20_TOKENS = [
   
@@ -25,15 +26,10 @@ const ERC20_TOKENS = [
   // Add more tokens as needed
 ];
 
-// npx remix-serve build/server/index.js
-
-
-// // Replace with your actual contract ABI
-// const CONTRACT_ABI = [
-//   "function approve(address collateralAddress, uint256 amount) public"
-// ];
-
-// Replace with your actual contract address
+// Failed to create option: execution reverted (unknown custom error) 
+// (action="estimateGas", data="0xe450d38c000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000000000000000000000000000000000000000000000005af3107a3fff0000000000000000000000000000000000000000000000000de0b6b3a7640000", 
+// reason=null, transaction={ "data": "0xa647e8ec0000000000000000000000008f86403a4de0bb5791fa46b8e795c547942fe4cf000000000000000000000000000000000000000000000000000000006712f6800000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000de0b6b3a7640000", 
+// "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "to": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d" }, invocation=null, revert=null, code=CALL_EXCEPTION, version=6.13.4)
 const CONTRACT_ADDRESS = "0xc6e7df5e7b4f2a278906862b61205850344d4e7d";
 
 const ERC20OptionForm = () => {
@@ -57,7 +53,8 @@ const ERC20OptionForm = () => {
           // setProvider(provider);
           const signer = await provider.getSigner();
           const address = await signer.getAddress();
-          setAccount(address);
+          setAccount(account);
+          console.log(signer);
 
 
         //   const cookcontractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
@@ -104,22 +101,22 @@ const ERC20OptionForm = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerAddress = await signer.getAddress();
-      setAccount(signerAddress);
-      console.log(signer);
+      setAccount(account);
 
+      console.log(signer);
       
 
 
       const optionConvert = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
-      setContract(optionConvert);
+      setContract(contract);
 
 
       console.log(contract);
 
       const token = new ethers.Contract(assetToken, erc20abi, signer);
 
-      await token.connect(signer).approve(CONTRACT_ADDRESS, amount);
-
+      await token.approve(CONTRACT_ADDRESS, amount);
+      console.log("approved", token)
 
       const tx = await optionConvert.mint(
         assetToken,
@@ -213,7 +210,7 @@ const ERC20OptionForm = () => {
           <button
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            disabled={!account}
+            // disabled={!account}
           >
             Create Option
           </button>

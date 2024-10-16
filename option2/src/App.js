@@ -94,6 +94,8 @@
 import React from 'react';
 import MetaMaskERC20Balance from './MetaMaskERC20Balance';
 import ERC20OptionForm from './ERC20OptionForm';
+import TokenOptionComponent from './option';
+
 
 function App() {
   return (
@@ -103,6 +105,7 @@ function App() {
         <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
           <h1 className="text-2xl font-bold mb-5 text-center">My DApp</h1>
           <MetaMaskERC20Balance />
+          <TokenOptionComponent />
           <div className="mt-8">
             <ERC20OptionForm />
           </div>
