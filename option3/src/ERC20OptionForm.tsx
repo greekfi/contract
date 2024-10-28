@@ -30,7 +30,7 @@ const ERC20_TOKENS = [
 // (action="estimateGas", data="0xe450d38c000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000000000000000000000000000000000000000000000005af3107a3fff0000000000000000000000000000000000000000000000000de0b6b3a7640000", 
 // reason=null, transaction={ "data": "0xa647e8ec0000000000000000000000008f86403a4de0bb5791fa46b8e795c547942fe4cf000000000000000000000000000000000000000000000000000000006712f6800000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000de0b6b3a7640000", 
 // "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "to": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d" }, invocation=null, revert=null, code=CALL_EXCEPTION, version=6.13.4)
-const CONTRACT_ADDRESS = "0xc6e7df5e7b4f2a278906862b61205850344d4e7d";
+const CONTRACT_ADDRESS = "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90";
 
 const ERC20OptionForm = () => {
   const [assetToken, setSelectedToken] = useState('');
@@ -115,8 +115,10 @@ const ERC20OptionForm = () => {
 
       const token = new ethers.Contract(assetToken, erc20abi, signer);
 
-      await token.approve(CONTRACT_ADDRESS, amount);
-      console.log("approved", token)
+      // await optionConvert.approve(assetToken, amount);
+      const approval = await token.approve(CONTRACT_ADDRESS, amount);
+      approval.wait();
+      console.log("approved", optionConvert)
 
       const tx = await optionConvert.mint(
         assetToken,

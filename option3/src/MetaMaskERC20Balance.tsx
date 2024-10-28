@@ -9,6 +9,7 @@ const PREDEFINED_TOKENS = [
   { name: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
   { name: 'USCC', address: '0xF8d99FcadE2E7F4002D23CF6685DcC58ed1B89F6' },
   { name: 'CT', address: '0x1Bf2A38993B542C9a5d182f5ce75136dFE63380C' },
+  { name: 'Mock', address: '0x8f86403a4de0bb5791fa46b8e795c547942fe4cf' },
   // 0x1Bf2A38993B542C9a5d182f5ce75136dFE63380C
   { name: 'Custom', address: 'custom' }
 ];
