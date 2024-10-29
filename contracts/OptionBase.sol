@@ -18,6 +18,7 @@ contract OptionBase is ERC20, Ownable {
     error ContractNotExpired();
     error ContractExpired();
     error InsufficientOptionBalance();
+    error InsufficientBalance();
     error NoBalance();
 
     modifier expired() {
@@ -30,6 +31,13 @@ contract OptionBase is ERC20, Ownable {
     modifier notExpired() {
         if (block.timestamp < expirationDate) {
             revert ContractExpired();
+        }
+        _;
+    }
+
+    modifier sufficientBalance(address contractHolder, uint256 amount) {
+        if (balanceOf(contractHolder) < amount) {
+            revert InsufficientOptionBalance();
         }
         _;
     }

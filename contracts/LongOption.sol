@@ -10,6 +10,14 @@ contract LongOption is OptionBase {
 
     event OptionTokenCreated(address collateralAddress, address shortOptionAdress,uint256 expirationDate, uint256 strikePrice, bool isPut);
 
+
+    modifier sufficientShortBalance(address contractHolder, uint256 amount) {
+        if (shortOption.balanceOf(contractHolder) < amount) {
+            revert InsufficientOptionBalance();
+        }
+        _;
+    }
+
     constructor (
         string memory name,
         string memory symbol,
@@ -45,11 +53,12 @@ contract LongOption is OptionBase {
         burn(contractHolder, amount);
     }
 
-    function redeem(address contractHolder, uint256 amount) public notExpired {
-        if (shortOption.balanceOf(contractHolder) >= amount) {
-            shortOption.redeem(contractHolder, amount);
-        } else {
-            revert InsufficientOptionBalance();
-        }
+    function redeem(address contractHolder, uint256 amount) 
+        public 
+        notExpired 
+        sufficientBalance(contractHolder, amount) 
+        sufficientShortBalance(contractHolder, amount) {
+            shortOption.redeemPair(contractHolder, amount);
+            burn(contractHolder, amount);
     }
 }
