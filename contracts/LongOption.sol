@@ -4,28 +4,35 @@ pragma solidity ^0.8.0;
 import "./ShortOption.sol";
 import "./OptionBase.sol";
 
-
 contract LongOption is OptionBase {
     address public shortOptionAdress;
     ShortOption public shortOption;
 
-
-    event OptionTokenCreated(address collateralAddress, address shortOptionAdress,uint256 expirationDate, uint256 strikePrice);
+    event OptionTokenCreated(address collateralAddress, address shortOptionAdress,uint256 expirationDate, uint256 strikePrice, bool isPut);
 
     constructor (
         string memory name,
         string memory symbol,
-        address _collateralAddress,
-        address _considerationAddress,
-        uint256 _expirationDate,
-        uint256 _strike,
-        bool _isPut
+        address collateralAddress,
+        address considerationAddress,
+        uint256 expirationDate,
+        uint256 strike,
+        bool isPut
         
-    ) OptionBase(name, symbol, _collateralAddress, _considerationAddress, _expirationDate, _strike, _isPut) {
-        shortOption = new ShortOption(name, symbol, _collateralAddress, _considerationAddress, _expirationDate, _strike, _isPut);
-        shortOptionAdress = address(shortOption);
+    ) OptionBase(
+        name, 
+        symbol, 
+        collateralAddress, 
+        considerationAddress, 
+        expirationDate, 
+        strike, 
+        isPut
+        ) {
 
-        emit OptionTokenCreated(collateralAddress, shortOptionAdress, expirationDate, strike);
+            shortOption = new ShortOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strike, isPut);
+            shortOptionAdress = address(shortOption);
+
+            emit OptionTokenCreated(collateralAddress, shortOptionAdress, expirationDate, strike, isPut);
     } 
 
     function mint(address to, uint256 amount) public {
@@ -45,6 +52,4 @@ contract LongOption is OptionBase {
             revert InsufficientOptionBalance();
         }
     }
-
-
 }

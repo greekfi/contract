@@ -43,5 +43,4 @@ contract ShortOption is OptionBase {
         collateral.transfer(contractHolder, amount);
         consideration.transferFrom(contractHolder, address(this), amount * strike);
     }
-
 }

@@ -6,7 +6,6 @@ import "./LongOption.sol";
 // import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 
-
 contract OptionsFactory is Ownable {
 
     mapping (bool=>mapping(address=>mapping(address=>mapping(uint256=>mapping(uint256=>address))))) optionsContracts;
@@ -41,6 +40,4 @@ contract OptionsFactory is Ownable {
     function getOptionContractAddress(address collateralAddress, address considerationAddress, uint256 expirationDate, uint256 strike, bool isPut) public view returns (address){
         return optionsContracts[isPut][collateralAddress][considerationAddress][expirationDate][strike];
     }
-
-
 }

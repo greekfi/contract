@@ -20,7 +20,6 @@ contract OptionBase is ERC20, Ownable {
     error InsufficientOptionBalance();
     error NoBalance();
 
-
     modifier expired() {
         if (block.timestamp >= expirationDate) {
             revert ContractNotExpired();
@@ -79,7 +78,6 @@ contract OptionBase is ERC20, Ownable {
         }
     }
 
-
     function burn(address from, uint256 amount) public {
         _burn(from, amount);
     }
@@ -93,5 +91,4 @@ contract OptionBase is ERC20, Ownable {
      function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         return super.transferFrom(from, to, value);
     }
-    
 }
