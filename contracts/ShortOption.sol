@@ -82,10 +82,6 @@ contract ShortOption is OptionBase {
         consideration.transferFrom(contractHolder, address(this), considerationAmount);
     }
 
-    function redeemAdmin(address contractHolder, uint256 amount) public onlyOwner sufficientBalance(contractHolder, amount) {
-        redeem_(contractHolder, amount);
-    }
-
     function isBalanced() public view returns (bool) {
         return strikeNum * vaultCollateral() + vaultConsideration() * strikeDen == strikeNum * totalSupply();
     }

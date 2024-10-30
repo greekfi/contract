@@ -8,7 +8,8 @@ contract LongOption is OptionBase {
     address public shortOptionAdress;
     ShortOption public shortOption;
 
-    event OptionTokenCreated(
+    event LongOptionCreated(
+        address optionContractAddress,
         address collateralAddress, 
         address shortOptionAdress,
         uint256 expirationDate, 
@@ -55,7 +56,8 @@ contract LongOption is OptionBase {
         );
         shortOptionAdress = address(shortOption);
 
-        emit OptionTokenCreated(
+        emit LongOptionCreated(
+            address(this),
             collateralAddress, 
             shortOptionAdress, 
             expirationDate, 

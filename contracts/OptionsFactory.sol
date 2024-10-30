@@ -38,14 +38,7 @@ contract OptionsFactory is Ownable {
         ) public {
 
         LongOption optionToken = new LongOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
-        address optionContractAddress = address(optionToken);
-        optionsContracts[isPut][collateralAddress][considerationAddress][expirationDate][strikeNum][strikeDen] = optionContractAddress;
-        contracts.push(optionContractAddress);
-        userContracts[msg.sender].push(optionContractAddress);
-        emit OptionCreated(optionContractAddress, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
+        emit OptionCreated(address(optionToken), collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
     }
 
-    function getOptionContractAddress(address collateralAddress, address considerationAddress, uint256 expirationDate, uint256 strikeNum, uint256 strikeDen, bool isPut) public view returns (address){
-        return optionsContracts[isPut][collateralAddress][considerationAddress][expirationDate][strikeNum][strikeDen];
-    }
 }
