@@ -9,7 +9,8 @@ contract OptionBase is ERC20, Ownable {
     address public collateralAddress;
     address public considerationAddress;
     uint256 public  expirationDate;
-    uint256 public  strike;
+    uint256 public  strikeNum;
+    uint256 public  strikeDen;
     address[] public owners;
     bool public isPut;
     IERC20 public collateral;
@@ -20,6 +21,7 @@ contract OptionBase is ERC20, Ownable {
     error InsufficientOptionBalance();
     error InsufficientBalance();
     error NoBalance();
+    error InvalidStrike();
 
     modifier expired() {
         if (block.timestamp >= expirationDate) {
@@ -48,12 +50,16 @@ contract OptionBase is ERC20, Ownable {
         address _collateralAddress, 
         address _considerationAddress,
         uint256 _expirationDate, 
-        uint256 _strike,
+        uint256 _strikeNum,
+        uint256 _strikeDen,
         bool _isPut
         ) ERC20(name, symbol) Ownable(msg.sender) {
 
+        if (_strikeDen == 0) revert InvalidStrike();
+
         expirationDate = _expirationDate;
-        strike = _strike;
+        strikeNum = _strikeNum;
+        strikeDen = _strikeDen;
         collateralAddress = _collateralAddress;
         considerationAddress = _considerationAddress;
         isPut = _isPut;
@@ -61,7 +67,6 @@ contract OptionBase is ERC20, Ownable {
         consideration = IERC20(_considerationAddress);
 
         }
-
 
     function getCollateralBalance() public view returns (uint256) {
         return collateral.balanceOf(address(this));

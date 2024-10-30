@@ -22,9 +22,10 @@ contract ShortOption is OptionBase {
         address collateralAddress, 
         address considerationAddress,
         uint256 expirationDate, 
-        uint256 strike,
+        uint256 strikeNum,
+        uint256 strikeDen,
         bool isPut
-        ) OptionBase(name, symbol, collateralAddress, considerationAddress, expirationDate, strike, isPut) {
+        ) OptionBase(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut) {
 
         longOption = msg.sender;
         }
@@ -45,7 +46,7 @@ contract ShortOption is OptionBase {
         // If we couldn't fully fulfill with collateral, try to fulfill remainder with consideration
         if (collateralToSend < amount) {
             uint256 remainingAmount = amount - collateralToSend;
-            uint256 considerationNeeded = remainingAmount * strike;
+            uint256 considerationNeeded = (remainingAmount * strikeNum) / strikeDen;
             
             // Verify we have enough consideration tokens
             if (considerationBalance < considerationNeeded) {
@@ -76,11 +77,24 @@ contract ShortOption is OptionBase {
 
     function exercise(address contractHolder, uint256 amount) public notExpired {
         collateral.transferFrom(address(this), contractHolder, amount);
-        consideration.transferFrom(contractHolder, address(this), amount * strike);
+        // Update consideration calculation
+        uint256 considerationAmount = (amount * strikeNum) / strikeDen;
+        consideration.transferFrom(contractHolder, address(this), considerationAmount);
     }
 
     function redeemAdmin(address contractHolder, uint256 amount) public onlyOwner sufficientBalance(contractHolder, amount) {
         redeem_(contractHolder, amount);
+    }
+
+    function isBalanced() public view returns (bool) {
+        return strikeNum * vaultCollateral() + vaultConsideration() * strikeDen == strikeNum * totalSupply();
+    }
+    function vaultCollateral() public view returns (uint256) {
+        return collateral.balanceOf(address(this));
+    }
+
+    function vaultConsideration() public view returns (uint256) {
+        return consideration.balanceOf(address(this));
     }
 
 }

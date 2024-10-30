@@ -8,8 +8,14 @@ contract LongOption is OptionBase {
     address public shortOptionAdress;
     ShortOption public shortOption;
 
-    event OptionTokenCreated(address collateralAddress, address shortOptionAdress,uint256 expirationDate, uint256 strikePrice, bool isPut);
-
+    event OptionTokenCreated(
+        address collateralAddress, 
+        address shortOptionAdress,
+        uint256 expirationDate, 
+        uint256 strikeNum,
+        uint256 strikeDen, 
+        bool isPut
+    );
 
     modifier sufficientShortBalance(address contractHolder, uint256 amount) {
         if (shortOption.balanceOf(contractHolder) < amount) {
@@ -24,23 +30,39 @@ contract LongOption is OptionBase {
         address collateralAddress,
         address considerationAddress,
         uint256 expirationDate,
-        uint256 strike,
+        uint256 strikeNum,
+        uint256 strikeDen,
         bool isPut
-        
     ) OptionBase(
         name, 
         symbol, 
         collateralAddress, 
         considerationAddress, 
         expirationDate, 
-        strike, 
+        strikeNum, 
+        strikeDen, 
         isPut
-        ) {
+    ) {
+        shortOption = new ShortOption(
+            name, 
+            symbol, 
+            collateralAddress, 
+            considerationAddress, 
+            expirationDate, 
+            strikeNum,
+            strikeDen, 
+            isPut
+        );
+        shortOptionAdress = address(shortOption);
 
-            shortOption = new ShortOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strike, isPut);
-            shortOptionAdress = address(shortOption);
-
-            emit OptionTokenCreated(collateralAddress, shortOptionAdress, expirationDate, strike, isPut);
+        emit OptionTokenCreated(
+            collateralAddress, 
+            shortOptionAdress, 
+            expirationDate, 
+            strikeNum,
+            strikeDen, 
+            isPut
+        );
     } 
 
     function mint(address to, uint256 amount) public {
