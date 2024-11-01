@@ -121,11 +121,9 @@ contract ShortOption is OptionBase, Ownable {
 
     address public longOption;
 
-    error InsufficientCollateral();
-
     modifier sufficientCollateral(address contractHolder, uint256 amount) {
         if (collateral.balanceOf(contractHolder) < amount) {
-            revert InsufficientCollateral();
+            revert InsufficientBalance("Insufficient collateral balance");
         }
         _;
     }
@@ -173,7 +171,7 @@ contract ShortOption is OptionBase, Ownable {
             
             // Verify we have enough consideration tokens
             if (considerationBalance < considerationNeeded) {
-                revert InsufficientBalance();
+                revert InsufficientBalance("Insufficient consideration balance in contract");
             }
             
             // Transfer consideration tokens for the remaining amount
@@ -239,7 +237,7 @@ contract LongOption is OptionBase {
 
     modifier sufficientShortBalance(address contractHolder, uint256 amount) {
         if (shortOption.balanceOf(contractHolder) < amount) {
-            revert InsufficientBalance();
+            revert InsufficientBalance("Insufficient short option balance");
         }
         _;
     }
