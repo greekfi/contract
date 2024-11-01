@@ -11,6 +11,12 @@ import "@openzeppelin/contracts/access/ReentrancyGuard.sol";
 // The redemption is only possible if you own both the Long and Short Option contracts but 
 // performed by the Long Option contract
 
+// In options traditionally a Consideration is cash and a Collateral is an asset
+// Here, we do not distinguish between the Cash and Asset concept and allow consideration
+// to be any asset and collateral to be any asset as well. This can allow wETH to be used
+// as collateral and wBTC to be used as consideration. Similarly, staked ETH can be used
+// or even staked stable coins can be used as well for either consideration or collateral.
+
 contract OptionBase is ERC20, ReentrancyGuard {
 
     address public collateralAddress;
@@ -24,10 +30,10 @@ contract OptionBase is ERC20, ReentrancyGuard {
 
     error ContractNotExpired();
     error ContractExpired();
-    error InsufficientOptionBalance();
-    error InsufficientBalance();
-    error NoBalance();
+    error InsufficientBalance(string message);
     error InvalidStrike();
+    error InvalidExpiration();
+    error InvalidAmount();
 
     modifier expired() {
         if (block.timestamp < expirationDate) {
@@ -43,9 +49,14 @@ contract OptionBase is ERC20, ReentrancyGuard {
         _;
     }
 
+    modifier validAmount(uint256 amount) {
+        if (amount < 1) revert InvalidAmount();
+        _;
+    }
+
     modifier sufficientBalance(address contractHolder, uint256 amount) {
         if (balanceOf(contractHolder) < amount) {
-            revert InsufficientOptionBalance();
+            revert InsufficientBalance("Insufficient balance");
         }
         _;
     }
@@ -62,6 +73,8 @@ contract OptionBase is ERC20, ReentrancyGuard {
         ) ERC20(name, symbol) Ownable(msg.sender) ReentrancyGuard() {
 
         if (_strikeDen == 0) revert InvalidStrike();
+        if (_strikeNum == 0) revert InvalidStrike();
+        if (_expirationDate < block.timestamp) revert InvalidExpiration();
 
         expirationDate = _expirationDate;
         strikeNum = _strikeNum;
@@ -133,16 +146,17 @@ contract ShortOption is OptionBase, Ownable {
         longOption = msg.sender;
         }
 
-    function mint(address to, uint256 amount) public onlyOwner sufficientCollateral(to, amount) {
-        __mint(to, amount);
+    function mint(address to, uint256 amount) public onlyOwner sufficientCollateral(to, amount) validAmount(amount) {
+        mint__(to, amount);
     }
 
-    function __mint(address to, uint256 amount) private nonReentrant sufficientCollateral(to, amount) {
+    function mint__(address to, uint256 amount) private nonReentrant sufficientCollateral(to, amount) validAmount(amount) {
         _mint(to, amount);
         collateral.transferFrom(to, address(this), amount);
     }
 
-    function redeem_(address to, uint256 amount) private nonReentrant sufficientBalance(to, amount) {
+    function redeem_(address to, uint256 amount) private nonReentrant sufficientBalance(to, amount) validAmount(amount){
+
         // Get current balances
         uint256 collateralBalance = getCollateralBalance();
         uint256 considerationBalance = getConsiderationBalance();
@@ -225,7 +239,7 @@ contract LongOption is OptionBase {
 
     modifier sufficientShortBalance(address contractHolder, uint256 amount) {
         if (shortOption.balanceOf(contractHolder) < amount) {
-            revert InsufficientOptionBalance();
+            revert InsufficientBalance();
         }
         _;
     }
@@ -272,14 +286,13 @@ contract LongOption is OptionBase {
         );
     } 
 
-    function mint( uint256 amount) public nonReentrant {
-        require(amount > 0, "Amount must be greater than zero");
+    function mint( uint256 amount) public nonReentrant validAmount(amount) {
         address contractHolder = msg.sender;
         _mint(contractHolder, amount);
         shortOption.mint(contractHolder, amount);
     }
 
-    function exercise(uint256 amount) public notExpired nonReentrant {
+    function exercise(uint256 amount) public notExpired nonReentrant validAmount(amount) {
         address contractHolder = msg.sender;
         burn(contractHolder, amount);
         shortOption.exercise(contractHolder, amount);
@@ -290,7 +303,8 @@ contract LongOption is OptionBase {
         notExpired 
         nonReentrant
         sufficientBalance(msg.sender, amount) 
-        sufficientShortBalance(msg.sender, amount) {
+        sufficientShortBalance(msg.sender, amount) 
+        validAmount(amount){
 
         address contractHolder = msg.sender;
         shortOption.redeemPair(contractHolder, amount);
