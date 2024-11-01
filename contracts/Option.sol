@@ -5,7 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/ReentrancyGuard.sol";
 
-contract OptionBase is ERC20, Ownable, ReentrancyGuard {
+// The Long Option contract is the owner of the Short Option contract
+// The Long Option contract is the only one that can mint new options
+// The Long Option contract is the only one that can exercise options
+// The redemption is only possible if you own both the Long and Short Option contracts but 
+// performed by the Long Option contract
+
+contract OptionBase is ERC20, ReentrancyGuard {
 
     address public collateralAddress;
     address public considerationAddress;
@@ -91,14 +97,14 @@ contract OptionBase is ERC20, Ownable, ReentrancyGuard {
         }
     }
 
-    function burn(address from, uint256 amount) public {
+    function burn(address from, uint256 amount) private {
         _burn(from, amount);
     }
 
 
 }
 
-contract ShortOption is OptionBase {
+contract ShortOption is OptionBase, Ownable {
 
     address public longOption;
 
@@ -120,17 +126,23 @@ contract ShortOption is OptionBase {
         uint256 strikeNum,
         uint256 strikeDen,
         bool isPut
-        ) OptionBase(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut) {
+        )
+        Ownable(msg.sender)
+        OptionBase(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut) {
 
         longOption = msg.sender;
         }
 
     function mint(address to, uint256 amount) public onlyOwner sufficientCollateral(to, amount) {
+        __mint(to, amount);
+    }
+
+    function __mint(address to, uint256 amount) private nonReentrant sufficientCollateral(to, amount) {
         _mint(to, amount);
         collateral.transferFrom(to, address(this), amount);
     }
 
-    function redeem_(address to, uint256 amount) private sufficientBalance(to, amount) {
+    function redeem_(address to, uint256 amount) private nonReentrant sufficientBalance(to, amount) {
         // Get current balances
         uint256 collateralBalance = getCollateralBalance();
         uint256 considerationBalance = getConsiderationBalance();
@@ -161,6 +173,9 @@ contract ShortOption is OptionBase {
         
     }
 
+    // The redemption is only possible if the option is expired
+    // The redemption can actually be performed by anyone because it's a safe function
+    // The result is that the actual owner of the Short Option will get the collateral or consideration
     function redeem(address to, uint256 amount) public expired sufficientBalance(to, amount) {
         redeem_(to, amount);
     }
@@ -170,11 +185,15 @@ contract ShortOption is OptionBase {
         redeem_(to, amount);
     }
 
-    function exercise(address contractHolder, uint256 amount) public notExpired onlyOwner(){
+    function exercise_(address contractHolder, uint256 amount) private nonReentrant notExpired onlyOwner(){
         collateral.transfer(contractHolder, amount);
         // Update consideration calculation
         uint256 considerationAmount = (amount * strikeNum) / strikeDen;
         consideration.transferFrom(contractHolder, address(this), considerationAmount);
+    }
+
+    function exercise(address contractHolder, uint256 amount) public notExpired onlyOwner() {
+        exercise_(contractHolder, amount);
     }
 
     function isBalanced() public view returns (bool) {
@@ -191,13 +210,13 @@ contract ShortOption is OptionBase {
 }
 
 contract LongOption is OptionBase {
-    address public shortOptionAdress;
+    address public shortOptionAddress;
     ShortOption public shortOption;
 
     event LongOptionCreated(
         address optionContractAddress,
         address collateralAddress, 
-        address shortOptionAdress,
+        address shortOptionAddress,
         uint256 expirationDate, 
         uint256 strikeNum,
         uint256 strikeDen, 
@@ -240,12 +259,12 @@ contract LongOption is OptionBase {
             strikeDen, 
             isPut
         );
-        shortOptionAdress = address(shortOption);
+        shortOptionAddress = address(shortOption);
 
         emit LongOptionCreated(
             address(this),
             collateralAddress, 
-            shortOptionAdress, 
+            shortOptionAddress, 
             expirationDate, 
             strikeNum,
             strikeDen, 
@@ -253,21 +272,23 @@ contract LongOption is OptionBase {
         );
     } 
 
-    function mint(address to, uint256 amount) public {
-        _mint(to, amount);
-        shortOption.mint(to, amount);
+    function mint( uint256 amount) public nonReentrant {
+        require(amount > 0, "Amount must be greater than zero");
+        address contractHolder = msg.sender;
+        _mint(contractHolder, amount);
+        shortOption.mint(contractHolder, amount);
     }
 
-    function exercise(uint256 amount) public notExpired onlyOwner() {
+    function exercise(uint256 amount) public notExpired nonReentrant {
         address contractHolder = msg.sender;
-        shortOption.exercise(contractHolder, amount);
         burn(contractHolder, amount);
+        shortOption.exercise(contractHolder, amount);
     }
 
     function redeem(uint256 amount) 
         public 
         notExpired 
-        onlyOwner()
+        nonReentrant
         sufficientBalance(msg.sender, amount) 
         sufficientShortBalance(msg.sender, amount) {
 
@@ -278,6 +299,7 @@ contract LongOption is OptionBase {
 }
 
 contract OptionFactory is Ownable {
+    address[] public createdOptions;
 
 
     event OptionCreated(
@@ -306,6 +328,7 @@ contract OptionFactory is Ownable {
         ) public {
 
         LongOption optionToken = new LongOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
+        createdOptions.push(address(optionToken));
         emit OptionCreated(address(optionToken), collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
     }
 
