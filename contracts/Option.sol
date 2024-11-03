@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 // The Long Option contract is the owner of the Short Option contract
 // The Long Option contract is the only one that can mint new options
@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/access/ReentrancyGuard.sol";
 // as collateral and wBTC to be used as consideration. Similarly, staked ETH can be used
 // or even staked stable coins can be used as well for either consideration or collateral.
 
-contract OptionBase is ERC20, ReentrancyGuard {
+contract OptionBase is ERC20, Ownable, ReentrancyGuard {
 
     address public collateralAddress;
     address public considerationAddress;
@@ -30,7 +30,7 @@ contract OptionBase is ERC20, ReentrancyGuard {
 
     error ContractNotExpired();
     error ContractExpired();
-    error InsufficientBalance(string message);
+    error InsufficientBalance();
     error InvalidStrike();
     error InvalidExpiration();
     error InvalidAmount();
@@ -56,7 +56,7 @@ contract OptionBase is ERC20, ReentrancyGuard {
 
     modifier sufficientBalance(address contractHolder, uint256 amount) {
         if (balanceOf(contractHolder) < amount) {
-            revert InsufficientBalance("Insufficient balance");
+            revert InsufficientBalance();
         }
         _;
     }
@@ -87,43 +87,15 @@ contract OptionBase is ERC20, ReentrancyGuard {
 
         }
 
-    function getCollateralBalance() public view returns (uint256) {
-        return collateral.balanceOf(address(this));
-    }
-
-    function getConsiderationBalance() public view returns (uint256) {
-        return consideration.balanceOf(address(this));
-    }
-
-    function isExpired() public view returns (bool) {
-        return block.timestamp >= expirationDate;
-    }
-    function isNotExpired() public view returns (bool) {
-        return block.timestamp < expirationDate;
-    }
-
-    function optionType() public view returns (string memory) {
-        if (isPut) {
-            return "PUT";
-        } else {
-            return "CALL";
-        }
-    }
-
-    function burn(address from, uint256 amount) private {
-        _burn(from, amount);
-    }
-
-
 }
 
-contract ShortOption is OptionBase, Ownable {
+contract ShortOption is OptionBase {
 
     address public longOption;
 
     modifier sufficientCollateral(address contractHolder, uint256 amount) {
         if (collateral.balanceOf(contractHolder) < amount) {
-            revert InsufficientBalance("Insufficient collateral balance");
+            revert InsufficientBalance();
         }
         _;
     }
@@ -138,7 +110,6 @@ contract ShortOption is OptionBase, Ownable {
         uint256 strikeDen,
         bool isPut
         )
-        Ownable(msg.sender)
         OptionBase(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut) {
 
         longOption = msg.sender;
@@ -156,14 +127,14 @@ contract ShortOption is OptionBase, Ownable {
     function redeem_(address to, uint256 amount) private nonReentrant sufficientBalance(to, amount) validAmount(amount){
 
         // Get current balances
-        uint256 collateralBalance = getCollateralBalance();
-        uint256 considerationBalance = getConsiderationBalance();
+        uint256 collateralBalance = collateral.balanceOf(address(this));
+        uint256 considerationBalance = consideration.balanceOf(address(this));
         
         // First try to fulfill with collateral
         uint256 collateralToSend = amount <= collateralBalance ? amount : collateralBalance;
         
         // Burn the redeemed tokens
-        burn(to, amount);
+        _burn(to, amount);
         // If we couldn't fully fulfill with collateral, try to fulfill remainder with consideration
         if (collateralToSend < amount) {
             uint256 remainingAmount = amount - collateralToSend;
@@ -171,7 +142,7 @@ contract ShortOption is OptionBase, Ownable {
             
             // Verify we have enough consideration tokens
             if (considerationBalance < considerationNeeded) {
-                revert InsufficientBalance("Insufficient consideration balance in contract");
+                revert InsufficientBalance();
             }
             
             // Transfer consideration tokens for the remaining amount
@@ -208,17 +179,6 @@ contract ShortOption is OptionBase, Ownable {
         exercise_(contractHolder, amount);
     }
 
-    function isBalanced() public view returns (bool) {
-        return strikeNum * vaultCollateral() + vaultConsideration() * strikeDen == strikeNum * totalSupply();
-    }
-    function vaultCollateral() public view returns (uint256) {
-        return collateral.balanceOf(address(this));
-    }
-
-    function vaultConsideration() public view returns (uint256) {
-        return consideration.balanceOf(address(this));
-    }
-
 }
 
 contract LongOption is OptionBase {
@@ -237,7 +197,7 @@ contract LongOption is OptionBase {
 
     modifier sufficientShortBalance(address contractHolder, uint256 amount) {
         if (shortOption.balanceOf(contractHolder) < amount) {
-            revert InsufficientBalance("Insufficient short option balance");
+            revert InsufficientBalance();
         }
         _;
     }
@@ -292,7 +252,7 @@ contract LongOption is OptionBase {
 
     function exercise(uint256 amount) public notExpired nonReentrant validAmount(amount) {
         address contractHolder = msg.sender;
-        burn(contractHolder, amount);
+        _burn(contractHolder, amount);
         shortOption.exercise(contractHolder, amount);
     }
 
@@ -306,27 +266,14 @@ contract LongOption is OptionBase {
 
         address contractHolder = msg.sender;
         shortOption.redeemPair(contractHolder, amount);
-        burn(contractHolder, amount);
+        _burn(contractHolder, amount);
     }
 }
 
 contract OptionFactory is Ownable {
     address[] public createdOptions;
 
-
-    event OptionCreated(
-        address optionContractAddress, 
-        address indexed collateralAddress, 
-        address indexed considerationAddress, 
-        uint256 indexed expirationDate, 
-        uint256 strikeNum, 
-        uint256 strikeDen, 
-        bool isPut
-    );
-
-    constructor(
-    ) Ownable(msg.sender) {
-    }
+    constructor() Ownable(msg.sender) {}
 
     function createOption(
         string memory name, 
@@ -341,7 +288,6 @@ contract OptionFactory is Ownable {
 
         LongOption optionToken = new LongOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
         createdOptions.push(address(optionToken));
-        emit OptionCreated(address(optionToken), collateralAddress, considerationAddress, expirationDate, strikeNum, strikeDen, isPut);
     }
 
 }
