@@ -7,7 +7,7 @@ const config: HardhatUserConfig = {
     settings: {
         optimizer: {
             enabled: true,
-            runs: 200, // A lower runs value can further optimize your contract
+            runs: 1, // A lower runs value can further optimize your contract
         },
     },
 },
