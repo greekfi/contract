@@ -1,16 +1,21 @@
 import * as React from 'react'
 import { Connector, useConnect } from 'wagmi'
+import { Button, Space } from 'antd'
 
 export function WalletOptions() {
   const { connectors, connect } = useConnect()
 
-  return connectors.map((connector) => (
-    <WalletOption
-      key={connector.uid}
-      connector={connector}
-      onClick={() => connect({ connector })}
-    />
-  ))
+  return (
+    <Space direction="vertical" style={{ width: '100%' }}>
+      {connectors.map((connector) => (
+        <WalletOption
+          key={connector.uid}
+          connector={connector}
+          onClick={() => connect({ connector })}
+        />
+      ))}
+    </Space>
+  )
 }
 
 function WalletOption({
@@ -30,8 +35,14 @@ function WalletOption({
   }, [connector])
 
   return (
-    <button disabled={!ready} onClick={onClick}>
+    <Button
+      type="default"
+      size="large"
+      disabled={!ready}
+      onClick={onClick}
+      block
+    >
       {connector.name}
-    </button>
+    </Button>
   )
 }

@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.26+commit.8a97fa7a"
+		"version": "0.8.20+commit.a1b79de6"
 	},
 	"language": "Solidity",
 	"output": {
@@ -34,12 +34,7 @@
 					},
 					{
 						"internalType": "uint256",
-						"name": "strikeNum",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "strikeDen",
+						"name": "strike",
 						"type": "uint256"
 					},
 					{
@@ -249,13 +244,7 @@
 					{
 						"indexed": false,
 						"internalType": "uint256",
-						"name": "strikeNum",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "strikeDen",
+						"name": "strike",
 						"type": "uint256"
 					},
 					{
@@ -570,20 +559,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "strikeDen",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "strikeNum",
+				"name": "strike",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -816,7 +792,7 @@
 		"compilationTarget": {
 			"contracts/Option.sol": "LongOption"
 		},
-		"evmVersion": "cancun",
+		"evmVersion": "shanghai",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
@@ -885,11 +861,11 @@
 			]
 		},
 		"contracts/Option.sol": {
-			"keccak256": "0xd844b784beb43079010e7f03a96bdc5760deb8e35f72854a532ff000cf08f0e7",
+			"keccak256": "0x11b645a3e8f6836a8b45ee5a88287b983f4288867e15aa15b654905185b0aec7",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://016852b8f01ed21c1363fa2132e1f99c708acd159ad7343d14fb93794e21e0e5",
-				"dweb:/ipfs/QmXUxwPwx8gJP7VcVyBHXByyLotSkpsdatgV1vjLGFJJz4"
+				"bzz-raw://777a9878250a1fd76b41bc8fd81042fd0ff557cba285e93c1c62560d9f3cdec2",
+				"dweb:/ipfs/QmcRSVJQQHn2DqDeCR43iNydeyQ5PdHvJi185Rb94kuB9P"
 			]
 		}
 	},

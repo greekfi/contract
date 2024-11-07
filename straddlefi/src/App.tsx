@@ -2,9 +2,9 @@
 import { Account } from './account'
 import { WalletOptions } from './walletoptions'
 import  OptionCreator  from './createOption'
+import 'antd/dist/reset.css';
 import './App.css'
 
-import { SendTransaction } from './sendtransaction'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAccount, WagmiProvider } from 'wagmi'
@@ -23,12 +23,9 @@ function App() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <OptionCreator />
-        <SendTransaction />
-        
-        <ConnectWallet />
-      {/** ... */}
-       
+      <ConnectWallet />     
+      <OptionCreator />
+          
       
       </QueryClientProvider>
     </WagmiProvider>

@@ -1,15 +1,10 @@
-import  { useState,  } from 'react';
-import {  useAccount, useWriteContract } from 'wagmi';
-import { Address } from 'viem'
-// import { parseUnits } from 'viem';
-
-// You'll need to import your token lists here
+import { useState } from 'react';
+import { useAccount, useWriteContract } from 'wagmi';
+import { Select, Input, Switch, DatePicker, Button, Space, Form, Card } from 'antd';
+import { Address } from 'viem';
 import tokenList from './tokenList.json';
-import Select from 'react-select'
-import Calendar from 'react-calendar';
-// import contractAddresses from './contractAddresses.json';
 
-const CONTRACT_ADDRESS = '0xd9145CCE52D386f254917e481eB44e9943F39138'
+const CONTRACT_ADDRESS = '0xe67a4e393132911cf9822bb83cf440163b9c05de'
 
 const abi = [
   {
@@ -34,16 +29,6 @@ interface Token {
   symbol: string;
   decimals: number;
 }
-
-// const considerationSelectOptions = tokenList.consideration.map((token) => ({
-//   value: token.symbol,
-//   label: token.symbol
-// }));
-
-// const collateralSelectOptions = tokenList.collateral.map((token) => ({
-//   value: token.symbol,
-//   label: token.symbol
-// }));
 
 const OptionCreator = () => {
   const account = useAccount();
@@ -117,92 +102,98 @@ const OptionCreator = () => {
 
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Collateral Token</label>
-          <Select
-            options={tokenList.collateral}
-            onChange={(selectedOption) => setCollateralToken(selectedOption as Token)}
-          />
-
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Consideration Token</label>
-          <Select
-            options={tokenList.consideration}
-            onChange={(selectedOption) => setConsiderationToken(selectedOption as Token)}
-          />
-
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Amount</label>
-          <input
-            type="number"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter amount"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Strike Price</label>
-          <input
-            type="number"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={Number(strikePrice)}
-            onChange={(e) => setStrikePrice(Number(e.target.value))}
-            placeholder="Enter strike price"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-4">
-        <label className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-700">Option Type:</span>
-          <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
-            <input
-              type="checkbox"
-              className="hidden"
-              checked={isPut}
-              onChange={(e) => setIsPut(e.target.checked)}
-            />
-            <div 
-              className={`w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ease-in-out ${
-                isPut ? 'bg-blue-500' : 'bg-gray-300'
-              }`}
-              onClick={() => setIsPut(!isPut)}
+    <Card className="max-w-2xl mx-auto">
+      <Form layout="vertical">
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          {/* Token Selection */}
+          <Space style={{ width: '100%' }} size="large">
+            <Form.Item
+              label="Collateral Token"
+              style={{ width: '100%' }}
             >
-              <div
-                className={`w-4 h-4 mt-1 ml-1 bg-white rounded-full shadow transform duration-200 ease-in-out ${
-                  isPut ? 'translate-x-6' : ''
-                }`}
+              <Select
+                options={tokenList.collateral.map(token => ({
+                  value: token.symbol,
+                  label: token.symbol,
+                }))}
+                onChange={(value) => setCollateralToken(tokenList.collateral.find(t => t.symbol === value))}
               />
-            </div>
-          </div>
-          <span className="text-sm text-gray-600">{isPut ? 'PUT' : 'CALL'}</span>
-        </label>
-      </div>
+            </Form.Item>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Expiration Date</label>
-        <Calendar onChange={(value) => setExpirationDate(value as Date)} value={expirationDate ? new Date(expirationDate) : null} />
+            <Form.Item
+              label="Consideration Token"
+              style={{ width: '100%' }}
+            >
+              <Select
+                options={tokenList.consideration.map(token => ({
+                  value: token.symbol,
+                  label: token.symbol,
+                }))}
+                onChange={(value) => setConsiderationToken(tokenList.consideration.find(t => t.symbol === value))}
+              />
+            </Form.Item>
+          </Space>
 
-      </div>
+          {/* Amount and Strike Price */}
+          <Space style={{ width: '100%' }} size="large">
+            <Form.Item
+              label="Amount"
+              style={{ width: '100%' }}
+            >
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+              />
+            </Form.Item>
 
-      <button
-        className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-        onClick={handleCreateOption}
-        disabled={!account.address || !collateral || !consideration || !amount || !strikePrice || !expirationDate}
-      >
-        Create Option
-      </button>
-    </div>
+            <Form.Item
+              label="Strike Price"
+              style={{ width: '100%' }}
+            >
+              <Input
+                type="number"
+                value={strikePrice}
+                onChange={(e) => setStrikePrice(Number(e.target.value))}
+                placeholder="Enter strike price"
+              />
+            </Form.Item>
+          </Space>
+
+          {/* Option Type Switch */}
+          <Form.Item label="Option Type">
+            <Space>
+              <Switch
+                checked={isPut}
+                onChange={setIsPut}
+                checkedChildren="PUT"
+                unCheckedChildren="CALL"
+              />
+            </Space>
+          </Form.Item>
+
+          {/* Date Picker */}
+          <Form.Item label="Expiration Date">
+            <DatePicker
+              onChange={(date) => setExpirationDate(date?.toDate())}
+              showTime={false}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          {/* Create Button */}
+          <Button
+            type="primary"
+            onClick={handleCreateOption}
+            disabled={!account.address || !collateral || !consideration || !amount || !strikePrice || !expirationDate}
+            block
+          >
+            Create Option
+          </Button>
+        </Space>
+      </Form>
+    </Card>
   );
 };
 
