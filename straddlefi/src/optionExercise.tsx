@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { InputNumber, Button, Card, Space, message } from 'antd';
 import { parseUnits } from 'viem';
 
@@ -10,62 +10,27 @@ import TokenBalance from './optionTokenBalance';
 
 const longAbi = LongOptionABI.output.abi;
 
-const addressA = "0xca81e41A3eDF50Ed0DF26B89DD7696eE61f4631a";
-console.log(addressA);
-
 const ExerciseInterface = ({
-  longOptionAddress,
+  option
 }: {
-  longOptionAddress: `0x${string}`;
+  option: {
+    longOptionAddress: `0x${string}`;
+    collateralAddress: `0x${string}`;
+    collateralDecimals: number;
+    collateralAllowance: bigint;
+    considerationAddress: `0x${string}`;
+    considerationDecimals: number;
+    considerationAllowance: bigint;
+    isExpired: boolean;
+  };
 }) => {
+  const { longOptionAddress, collateralAddress, collateralDecimals, considerationAddress, considerationDecimals, considerationAllowance, isExpired } = option;
   const [amount, setAmount] = useState(0);
   const { address: userAddress } = useAccount();
   const [isExercising, setIsExercising] = useState(false);
 
 
-  const { data: collateralAddress } = useReadContract({
-    address: longOptionAddress, 
-    abi: longAbi,
-    functionName: 'collateralToken',
-  });
-
-  const { data: considerationAddress } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi, 
-    functionName: 'considerationToken',
-  });
-
-  // Get token decimals
-  const { data: considerationDecimals = 18n } = useReadContract({
-    address: considerationAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-
-  const { data: collateralDecimals = 18n } = useReadContract({
-    address: collateralAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-
-  // Check if contract is expired
-  const { data: expirationDate } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi,
-    functionName: 'expirationDate',
-  });
-
-  const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
-
-  // Check allowance
-  const { data: allowance = 0n } = useReadContract({
-    address: considerationAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'allowance',
-    args: [userAddress, longOptionAddress],
-  });
-
-  const isApproved = (allowance as bigint) >= parseUnits(amount.toString(), Number(considerationDecimals));
+  const isApproved = (considerationAllowance as bigint) >= parseUnits(amount.toString(), Number(considerationDecimals));
 
   const { writeContract } = useWriteContract();
 
@@ -79,26 +44,26 @@ const ExerciseInterface = ({
           abi: erc20abi,
           functionName: 'approve',
           args: [longOptionAddress, parseUnits(amount.toString(), Number(considerationDecimals))],
-      };
-      writeContract(approveConsideration);
-      const approveCollateral = {
-        address: collateralAddress as `0x${string}`,
-        abi: erc20abi,
-        functionName: 'approve',
-        args: [longOptionAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
-    };
-    writeContract(approveCollateral);
-      
-      // Then exercise
-      const exerciseConfig = {
-        address: longOptionAddress,
-        abi: longAbi,
-        functionName: 'exercise',
-        args: [parseUnits(amount.toString(), Number(considerationDecimals))],
-      };
-      
-      writeContract(exerciseConfig);
-      message.success('Options exercised successfully!');
+        };
+        writeContract(approveConsideration);
+        const approveCollateral = {
+          address: collateralAddress as `0x${string}`,
+          abi: erc20abi,
+          functionName: 'approve',
+          args: [longOptionAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
+        };
+        writeContract(approveCollateral);
+
+        // Then exercise
+        const exerciseConfig = {
+          address: longOptionAddress,
+          abi: longAbi,
+          functionName: 'exercise',
+          args: [parseUnits(amount.toString(), Number(considerationDecimals))],
+        };
+        
+        writeContract(exerciseConfig);
+        message.success('Options exercised successfully!');
     } catch (error) {
       message.error('Failed to exercise options');
       console.error(error);
@@ -137,7 +102,7 @@ const ExerciseInterface = ({
           <Button 
             type="primary"
             onClick={handleExercise}
-            loading={isExercising}
+            // loading={isPending}
             disabled={!amount || !isApproved || isExercising || isExpired}
           >
             Exercise Options

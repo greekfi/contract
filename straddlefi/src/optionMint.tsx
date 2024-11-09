@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { InputNumber, Button, Card, Space, message } from 'antd';
 import { parseUnits } from 'viem';
 
@@ -10,50 +10,27 @@ import TokenBalance from './optionTokenBalance';
 
 const longAbi = LongOptionABI.output.abi;
 
-const addressA = "0xca81e41A3eDF50Ed0DF26B89DD7696eE61f4631a";
-console.log(addressA);
 
 const MintInterface = ({
-  longOptionAddress,
+  option
 }: {
-  longOptionAddress: `0x${string}`;
+  option: {
+    longOptionAddress: `0x${string}`;
+    collateralAddress: `0x${string}`;
+    collateralDecimals: number;
+    collateralAllowance: bigint;
+    considerationAddress: `0x${string}`;
+    considerationDecimals: number;
+    considerationAllowance: bigint;
+    isExpired: boolean;
+  };
 }) => {
+  const { collateralAddress, collateralDecimals, collateralAllowance, longOptionAddress, isExpired } = option;
   const [amount, setAmount] = useState(0);
   const { address: userAddress } = useAccount();
   const [isMinting, setIsMinting] = useState(false);
 
-
-  const { data: collateralAddress } = useReadContract({
-    address: longOptionAddress, 
-    abi: longAbi,
-    functionName: 'collateralToken',
-  });
-
-
-  const { data: collateralDecimals = 18n } = useReadContract({
-    address: collateralAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-
-  // Check if contract is expired
-  const { data: expirationDate } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi,
-    functionName: 'expirationDate',
-  });
-
-  const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
-
-  // Check allowance
-  const { data: allowance = 0n } = useReadContract({
-    address: collateralAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'allowance',
-    args: [userAddress, longOptionAddress],
-  });
-
-  const isApproved = (allowance as bigint) >= parseUnits(amount.toString(), Number(collateralDecimals));
+  const isApproved = (collateralAllowance as bigint) >= parseUnits(amount.toString(), Number(collateralDecimals));
 
   const { writeContract } = useWriteContract();
 
@@ -118,7 +95,7 @@ const MintInterface = ({
           <Button 
             type="primary"
             onClick={handleMint}
-            loading={isMinting}
+            // loading={isMinting}
             disabled={!amount || isMinting || isApproved || isExpired}
           >
             Mint Options

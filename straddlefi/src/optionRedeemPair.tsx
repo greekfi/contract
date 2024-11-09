@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { InputNumber, Button, Card, Space, message } from 'antd';
 import { parseUnits } from 'viem';
 import LongOptionABI from '../../contracts/artifacts/LongOption_metadata.json';
@@ -8,31 +8,30 @@ import TokenBalance from './optionTokenBalance';
 const longAbi = LongOptionABI.output.abi;
 
 
-interface RedeemInterfaceProps {
-  longOptionAddress: `0x${string}`;
-}
-
 const RedeemInterface = ({
-  longOptionAddress,
-}: RedeemInterfaceProps) => {
+  option
+}: {
+  option: {
+    longOptionAddress: `0x${string}`;
+    collateralAddress: `0x${string}`;
+    collateralDecimals: number;
+    collateralAllowance: bigint;
+    considerationAddress: `0x${string}`;
+    considerationDecimals: number;
+    considerationAllowance: bigint;
+    isExpired: boolean;
+  };
+}) => {
+  const { longOptionAddress, collateralDecimals, isExpired } = option;
   const [amount, setAmount] = useState<number>(0);
   const { address: userAddress } = useAccount();
-
-  // Check if contract is expired
-  const { data: expirationDate } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi,
-    functionName: 'expirationDate',
-  });
-
-  const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
 
   // Prepare redeem transaction
   const redeemConfig = {
     address: longOptionAddress,
     abi: longAbi,
     functionName: 'redeem',
-    args: [parseUnits(amount.toString(), 18)],
+    args: [parseUnits(amount.toString(), collateralDecimals)],
     enabled: Boolean(amount && isExpired),
   };
 
