@@ -259,6 +259,15 @@ contract LongOption is OptionBase {
 }
 
 contract OptionFactory is Ownable {
+
+    event LongOptionCreated(
+        address optionContractAddress,
+        address collateralAddress, 
+        address shortOptionAddress,
+        uint256 expirationDate, 
+        uint256 strike,
+        bool isPut
+    );
     address[] public createdOptions;
 
     constructor() Ownable(msg.sender) {}
@@ -273,7 +282,17 @@ contract OptionFactory is Ownable {
         bool isPut
         ) public {
 
-        createdOptions.push(address(new LongOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strike, isPut)));
+        LongOption longOption = new LongOption(name, symbol, collateralAddress, considerationAddress, expirationDate, strike, isPut);
+        createdOptions.push(address(longOption));
+
+        emit LongOptionCreated(
+            address(longOption),
+            collateralAddress, 
+            longOption.shortOptionAddress(),
+            expirationDate, 
+            strike,
+            isPut
+        );
     }
 
 }

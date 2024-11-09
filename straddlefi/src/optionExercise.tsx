@@ -1,56 +1,23 @@
 import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import { InputNumber, Button, Card, Space, Statistic, message } from 'antd';
-import { parseUnits, formatUnits } from 'viem';
+import { InputNumber, Button, Card, Space, message } from 'antd';
+import { parseUnits } from 'viem';
 
 // Import ABIs and addresses
 import LongOptionABI from '../../contracts/artifacts/LongOption_metadata.json';
 import erc20abi from './erc20.abi.json';
+import TokenBalance from './optionTokenBalance';
 
 const longAbi = LongOptionABI.output.abi;
 
-
-const TokenBalance = ({ 
-  userAddress,  
-  tokenAddress, 
-  label, 
-}: {
-  userAddress: `0x${string}`,
-  tokenAddress: `0x${string}`,
-  label: string,
-  watch?: boolean
-}) => {
-  const { data: balance = 0n } = useReadContract({
-    address: tokenAddress,
-    abi: erc20abi,
-    functionName: 'balanceOf',
-    args: [userAddress],
-  });
-
-  const { data: decimals = 18n } = useReadContract({
-    address: tokenAddress,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-
-  return (
-    <Statistic 
-      title={label} 
-      value={Number(formatUnits(balance as bigint, Number(decimals)))} 
-      precision={6} 
-    />
-  );
-};
-
-
-interface ExerciseInterfaceProps {
-  longOptionAddress: `0x${string}`;
-  considerationAddress: `0x${string}`;
-}
+const addressA = "0xca81e41A3eDF50Ed0DF26B89DD7696eE61f4631a";
+console.log(addressA);
 
 const ExerciseInterface = ({
   longOptionAddress,
-}: ExerciseInterfaceProps) => {
+}: {
+  longOptionAddress: `0x${string}`;
+}) => {
   const [amount, setAmount] = useState(0);
   const { address: userAddress } = useAccount();
   const [isExercising, setIsExercising] = useState(false);

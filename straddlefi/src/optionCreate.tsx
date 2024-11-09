@@ -4,7 +4,7 @@ import { Select, Input, Switch, DatePicker, Button, Space, Form, Card } from 'an
 import { Address } from 'viem';
 import tokenList from './tokenList.json';
 
-const CONTRACT_ADDRESS = '0xe67a4e393132911cf9822bb83cf440163b9c05de'
+const CONTRACT_ADDRESS = '0x55a0acf6d9511ce3719ff8274ff8e30f3e35c543'
 
 const abi = [
   {
@@ -37,7 +37,6 @@ const OptionCreator = () => {
   // State management
   const [collateralTokenSymbol, setCollateralToken] = useState<Token>();
   const [considerationTokenSymbol, setConsiderationToken] = useState<Token>();
-  const [amount, setAmount] = useState('');
   const [strikePrice, setStrikePrice] = useState<number >(0);
   const [isPut, setIsPut] = useState(false);
   const [expirationDate, setExpirationDate] = useState<Date>();
@@ -65,7 +64,7 @@ const OptionCreator = () => {
 
   // const {strikeNum, strikeDen} = calculateStrikeRatio();
   const handleCreateOption = async () => {
-    if (!collateral || !consideration || !amount || !strikePrice || !expirationDate) {
+    if (!collateral || !consideration || !strikePrice || !expirationDate) {
       alert('Please fill in all fields');
       return;
     }
@@ -120,6 +119,19 @@ const OptionCreator = () => {
               />
             </Form.Item>
 
+
+            <Form.Item
+              label="Strike Price"
+              style={{ width: '100%' }}
+            >
+              <Input
+                type="number"
+                value={strikePrice}
+                onChange={(e) => setStrikePrice(Number(e.target.value))}
+                placeholder="Enter strike price"
+              />
+            </Form.Item>
+
             <Form.Item
               label="Consideration Token"
               style={{ width: '100%' }}
@@ -134,32 +146,7 @@ const OptionCreator = () => {
             </Form.Item>
           </Space>
 
-          {/* Amount and Strike Price */}
           <Space style={{ width: '100%' }} size="large">
-            <Form.Item
-              label="Amount"
-              style={{ width: '100%' }}
-            >
-              <Input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Strike Price"
-              style={{ width: '100%' }}
-            >
-              <Input
-                type="number"
-                value={strikePrice}
-                onChange={(e) => setStrikePrice(Number(e.target.value))}
-                placeholder="Enter strike price"
-              />
-            </Form.Item>
-          </Space>
 
           {/* Option Type Switch */}
           <Form.Item label="Option Type">
@@ -180,17 +167,19 @@ const OptionCreator = () => {
               showTime={false}
               style={{ width: '100%' }}
             />
-          </Form.Item>
-
-          {/* Create Button */}
+            </Form.Item>
+             {/* Create Button */}
           <Button
             type="primary"
             onClick={handleCreateOption}
-            disabled={!account.address || !collateral || !consideration || !amount || !strikePrice || !expirationDate}
+            disabled={!account.address || !collateral || !consideration || !strikePrice || !expirationDate}
             block
           >
-            Create Option
-          </Button>
+              Create Option
+            </Button>
+          </Space>
+
+         
         </Space>
       </Form>
     </Card>

@@ -1,20 +1,25 @@
 import * as React from 'react'
 import { Connector, useConnect } from 'wagmi'
-import { Button, Space } from 'antd'
+import { Button, Card, Form, Space } from 'antd'
 
 export function WalletOptions() {
   const { connectors, connect } = useConnect()
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
-      {connectors.map((connector) => (
-        <WalletOption
-          key={connector.uid}
-          connector={connector}
-          onClick={() => connect({ connector })}
-        />
-      ))}
-    </Space>
+
+    <Card className="max-w-2xl mx-auto">
+      <Form layout="vertical">
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          {connectors.map((connector) => (
+            <WalletOption
+              key={connector.uid}
+              connector={connector}
+              onClick={() => connect({ connector })}
+            />
+          ))}
+        </Space>
+      </Form>
+    </Card>
   )
 }
 

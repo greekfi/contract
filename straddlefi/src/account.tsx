@@ -1,3 +1,4 @@
+import { Card, Button } from 'antd'
 import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi'
 
 export function Account() {
@@ -7,10 +8,16 @@ export function Account() {
   const { data: ensAvatar } = useEnsAvatar({ name: ensName! })
 
   return (
-    <div>
-      {ensAvatar && <img alt="ENS Avatar" src={ensAvatar} />}
-      {address && <div>{ensName ? `${ensName} (${address})` : address}</div>}
-      <button onClick={() => disconnect()}>Disconnect</button>
-    </div>
+    
+    <Card className="max-w-2xl mx-auto">
+
+{ensAvatar && <img alt="ENS Avatar" src={ensAvatar} />}
+      {address && 
+        <Card>
+          {ensName ? `${ensName} (${address})` : address}
+        </Card>
+      }
+      <Button onClick={() => disconnect()}>Disconnect</Button>
+    </Card>
   )
 }

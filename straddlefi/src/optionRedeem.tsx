@@ -16,7 +16,7 @@ const RedeemInterface = ({
   longOptionAddress,
 }: RedeemInterfaceProps) => {
   const [amount, setAmount] = useState<number>(0);
-  const { address: userAddress } = useAccount();
+  const { address: userAddress, isConnected } = useAccount();
 
   // Check if contract is expired
   const { data: expirationDate } = useReadContract({
@@ -27,12 +27,19 @@ const RedeemInterface = ({
 
   const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
 
+  const { data: decimals } = useReadContract({
+    address: longOptionAddress,
+    abi: longAbi,
+    functionName: 'decimals',
+  });
+
+
   // Prepare redeem transaction
   const redeemConfig = {
     address: longOptionAddress,
     abi: longAbi,
     functionName: 'redeem',
-    args: [parseUnits(amount.toString(), 18)],
+    args: [parseUnits(amount.toString(), decimals as number)],
     enabled: Boolean(amount && isExpired),
   };
 
@@ -41,10 +48,9 @@ const RedeemInterface = ({
   const handleRedeem = async () => {
       redeem(redeemConfig);
       message.loading({ content: 'Redeeming tokens...', key: 'redeem', duration: 0 });
-    
   };
 
-  if (!userAddress) {
+  if (!isConnected || !userAddress) {
     return (
       <Card>
         <Space>Please connect your wallet to continue.</Space>

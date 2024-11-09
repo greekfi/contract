@@ -26,10 +26,16 @@ const TokenBalance = ({
       abi: erc20abi,
       functionName: 'decimals',
     });
+      
+    const { data: name = '' } = useReadContract({
+      address: tokenAddress,
+      abi: erc20abi,
+      functionName: 'name',
+    });
   
     return (
       <Statistic 
-        title={label} 
+        title={`${label} (${name})`} 
         value={Number(formatUnits(balance as bigint, Number(decimals)))} 
         precision={6} 
       />

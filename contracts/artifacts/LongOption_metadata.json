@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.20+commit.a1b79de6"
+		"version": "0.8.26+commit.8a97fa7a"
 	},
 	"language": "Solidity",
 	"output": {
@@ -792,14 +792,14 @@
 		"compilationTarget": {
 			"contracts/Option.sol": "LongOption"
 		},
-		"evmVersion": "shanghai",
+		"evmVersion": "cancun",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": false,
-			"runs": 200
+			"enabled": true,
+			"runs": 100
 		},
 		"remappings": []
 	},
@@ -861,11 +861,11 @@
 			]
 		},
 		"contracts/Option.sol": {
-			"keccak256": "0x11b645a3e8f6836a8b45ee5a88287b983f4288867e15aa15b654905185b0aec7",
+			"keccak256": "0x0a6e24189f7854fbcfca4e1d9e6743439adf86aa28ce3ede99677e866b0f7701",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://777a9878250a1fd76b41bc8fd81042fd0ff557cba285e93c1c62560d9f3cdec2",
-				"dweb:/ipfs/QmcRSVJQQHn2DqDeCR43iNydeyQ5PdHvJi185Rb94kuB9P"
+				"bzz-raw://b2f56350ad66217c7603884bd995d26b1caf41fc1a993be77db8fe3536753fd3",
+				"dweb:/ipfs/QmdKhkTUzSVobMhM2RRGKgt7Jnr164td2BXZ6t5uvLCn3B"
 			]
 		}
 	},
