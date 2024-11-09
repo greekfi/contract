@@ -35,7 +35,7 @@ const TokenBalance = ({
   
     return (
       <Statistic 
-        title={`${label} (${name})`} 
+        title={`${label} (${name}) ${tokenAddress}`} 
         value={Number(formatUnits(balance as bigint, Number(decimals)))} 
         precision={6} 
       />

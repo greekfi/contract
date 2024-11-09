@@ -17,7 +17,7 @@ function ConnectWallet() {
 }
 
 function OptionsFunctions() {
-    const longOptionAddress = '0x55a0acf6d9511ce3719ff8274ff8e30f3e35c543';
+    const longOptionAddress = '0x827c62d1484c789c739f352e9E5947c6e1B8fb74';
     return (
 
     <WagmiProvider config={config}>

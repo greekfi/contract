@@ -19,22 +19,26 @@ const MintInterface = ({
   longOptionAddress: `0x${string}`;
 }) => {
   const [amount, setAmount] = useState(0);
-  const { address: userAddress } = useAccount();
   const [isMinting, setIsMinting] = useState(false);
+  const { address: userAddress } = useAccount();
 
 
   const { data: collateralAddress } = useReadContract({
     address: longOptionAddress, 
     abi: longAbi,
-    functionName: 'collateralToken',
+    functionName: 'collateralAddress',
   });
+  console.log("collateralAddress");
+  console.log(collateralAddress);
 
 
-  const { data: collateralDecimals = 18n } = useReadContract({
+  const { data: collateralDecimals  } = useReadContract({
     address: collateralAddress as `0x${string}`,
     abi: erc20abi,
     functionName: 'decimals',
   });
+  console.log("collateralDecimals");
+  console.log(collateralDecimals?.toString());
 
   // Check if contract is expired
   const { data: expirationDate } = useReadContract({
@@ -50,7 +54,7 @@ const MintInterface = ({
     address: collateralAddress as `0x${string}`,
     abi: erc20abi,
     functionName: 'allowance',
-    args: [userAddress, longOptionAddress],
+    args: [userAddress],
   });
 
   const isApproved = (allowance as bigint) >= parseUnits(amount.toString(), Number(collateralDecimals));

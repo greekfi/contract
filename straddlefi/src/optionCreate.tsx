@@ -71,10 +71,11 @@ const OptionCreator = () => {
 
     const { strikeInteger } = calculateStrikeRatio();
     const expTimestamp = Math.floor(new Date(expirationDate).getTime() / 1000);
+    // fix time to gmt
     
     // Generate option name and symbol
-    const name = `${collateral.symbol}-${consideration.symbol}-${isPut ? 'P' : 'C'}-${expirationDate}-${strikeInteger}`;
-    const symbol = `${collateral.symbol}${consideration.symbol}${isPut ? 'P' : 'C'}${expirationDate}${strikeInteger}`;
+    const name = `${collateral.symbol}-${consideration.symbol}-${isPut ? 'P' : 'C'}-${expTimestamp}-${strikeInteger}`;
+    const symbol = `${collateral.symbol}${consideration.symbol}${isPut ? 'P' : 'C'}${expTimestamp}${strikeInteger}`;
 
     try {
       console.log(name, symbol, collateral.address, consideration.address, BigInt(expTimestamp), strikeInteger, isPut);
