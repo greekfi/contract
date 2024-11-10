@@ -14,55 +14,30 @@ const addressA = "0xca81e41A3eDF50Ed0DF26B89DD7696eE61f4631a";
 console.log(addressA);
 
 const ExerciseInterface = ({
-  longOptionAddress,
+  optionAddress,
+  collateralAddress,
+  considerationAddress,
+  collateralDecimals,
+  considerationDecimals,
+  isExpired,
 }: {
-  longOptionAddress: `0x${string}`;
+  optionAddress: `0x${string}`;
+  collateralAddress: `0x${string}`;
+  considerationAddress: `0x${string}`;
+  collateralDecimals: number;
+  considerationDecimals: number;
+  isExpired: boolean;
 }) => {
   const [amount, setAmount] = useState(0);
   const { address: userAddress } = useAccount();
   const [isExercising, setIsExercising] = useState(false);
-
-
-  const { data: collateralAddress } = useReadContract({
-    address: longOptionAddress, 
-    abi: longAbi,
-    functionName: 'collateralToken',
-  });
-
-  const { data: considerationAddress } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi, 
-    functionName: 'considerationToken',
-  });
-
-  // Get token decimals
-  const { data: considerationDecimals = 18n } = useReadContract({
-    address: considerationAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-
-  const { data: collateralDecimals = 18n } = useReadContract({
-    address: collateralAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-
-  // Check if contract is expired
-  const { data: expirationDate } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi,
-    functionName: 'expirationDate',
-  });
-
-  const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
 
   // Check allowance
   const { data: allowance = 0n } = useReadContract({
     address: considerationAddress as `0x${string}`,
     abi: erc20abi,
     functionName: 'allowance',
-    args: [userAddress, longOptionAddress],
+    args: [userAddress, optionAddress],
   });
 
   const isApproved = (allowance as bigint) >= parseUnits(amount.toString(), Number(considerationDecimals));
@@ -78,20 +53,20 @@ const ExerciseInterface = ({
           address: considerationAddress as `0x${string}`,
           abi: erc20abi,
           functionName: 'approve',
-          args: [longOptionAddress, parseUnits(amount.toString(), Number(considerationDecimals))],
+          args: [optionAddress, parseUnits(amount.toString(), Number(considerationDecimals))],
       };
       writeContract(approveConsideration);
       const approveCollateral = {
         address: collateralAddress as `0x${string}`,
         abi: erc20abi,
         functionName: 'approve',
-        args: [longOptionAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
+        args: [optionAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
     };
     writeContract(approveCollateral);
       
       // Then exercise
       const exerciseConfig = {
-        address: longOptionAddress,
+        address: optionAddress,
         abi: longAbi,
         functionName: 'exercise',
         args: [parseUnits(amount.toString(), Number(considerationDecimals))],
@@ -113,14 +88,16 @@ const ExerciseInterface = ({
         <Space style={{ width: '100%', justifyContent: 'space-between' }}>
           <TokenBalance
             userAddress={userAddress as `0x${string}`}
-            tokenAddress={longOptionAddress}
+            tokenAddress={optionAddress}
             label="Your Option Balance"
+            decimals={collateralDecimals as number}
             watch={true}
           />
           <TokenBalance
             userAddress={userAddress as `0x${string}`}
             tokenAddress={considerationAddress as `0x${string}`}
             label="Your Consideration Balance"
+            decimals={considerationDecimals as number}
             watch={true}
           />
         </Space>

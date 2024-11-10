@@ -295,4 +295,8 @@ contract OptionFactory is Ownable {
         );
     }
 
+    function getCreatedOptions() public view returns (address[] memory) {
+        return createdOptions;
+    }
+
 }

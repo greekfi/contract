@@ -1,6 +1,6 @@
 import { useReadContract } from 'wagmi';
 import { Statistic } from 'antd';
-import { formatUnits } from 'viem';
+import { Address, formatUnits } from 'viem';
 import erc20abi from './erc20.abi.json';
 
 
@@ -8,27 +8,35 @@ const TokenBalance = ({
     userAddress,  
     tokenAddress, 
     label, 
+    decimals,
   }: {
     userAddress: `0x${string}`,
     tokenAddress: `0x${string}`,
+    decimals: number,
     label: string,
     watch?: boolean
   }) => {
     const { data: balance = 0n } = useReadContract({
-      address: tokenAddress,
+      address: tokenAddress as Address,
       abi: erc20abi,
       functionName: 'balanceOf',
       args: [userAddress],
     });
   
-    const { data: decimals = 18n } = useReadContract({
-      address: tokenAddress,
+
+    
+    const { data: decimals_ } = useReadContract({
+      address: tokenAddress as Address,
       abi: erc20abi,
       functionName: 'decimals',
     });
+    if (!decimals) {
+      decimals = decimals_ as number;
+    }
+    console.log("decimals", decimals);
       
     const { data: name = '' } = useReadContract({
-      address: tokenAddress,
+      address: tokenAddress as Address,
       abi: erc20abi,
       functionName: 'name',
     });
@@ -41,5 +49,4 @@ const TokenBalance = ({
       />
     );
   };
-
 export default TokenBalance;

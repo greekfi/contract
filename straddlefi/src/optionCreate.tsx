@@ -3,8 +3,9 @@ import { useAccount, useWriteContract } from 'wagmi';
 import { Select, Input, Switch, DatePicker, Button, Space, Form, Card } from 'antd';
 import { Address } from 'viem';
 import tokenList from './tokenList.json';
+import moment from 'moment-timezone';
 
-const CONTRACT_ADDRESS = '0x55a0acf6d9511ce3719ff8274ff8e30f3e35c543'
+const CONTRACT_ADDRESS = '0x0dc40778e46d701209b809e7f3716673df3c4ebc'
 
 const abi = [
   {
@@ -31,8 +32,7 @@ interface Token {
 }
 
 const OptionCreator = () => {
-  const account = useAccount();
-  console.log(account);
+  const {isConnected} = useAccount();  
 
   // State management
   const [collateralTokenSymbol, setCollateralToken] = useState<Token>();
@@ -71,15 +71,17 @@ const OptionCreator = () => {
 
     const { strikeInteger } = calculateStrikeRatio();
     const expTimestamp = Math.floor(new Date(expirationDate).getTime() / 1000);
+    const date = new Date(expirationDate);
+    const fmtDate = moment(date).format('YYYYMMDD');;
     // fix time to gmt
     
     // Generate option name and symbol
-    const name = `${collateral.symbol}-${consideration.symbol}-${isPut ? 'P' : 'C'}-${expTimestamp}-${strikeInteger}`;
-    const symbol = `${collateral.symbol}${consideration.symbol}${isPut ? 'P' : 'C'}${expTimestamp}${strikeInteger}`;
+    const name = `OPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
+    const symbol = `OPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
 
     try {
       console.log(name, symbol, collateral.address, consideration.address, BigInt(expTimestamp), strikeInteger, isPut);
-      const tx = writeContract({
+      writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'createOption',
@@ -93,7 +95,6 @@ const OptionCreator = () => {
           isPut
         ],
       });
-      console.log(tx);
     } catch (error) {
       console.error('Error creating option:', error);
       alert('Failed to create option. Check console for details.');
@@ -101,6 +102,7 @@ const OptionCreator = () => {
   };
 
 
+  moment.tz.setDefault("Europe/London");
   return (
     <Card className="max-w-2xl mx-auto">
       <Form layout="vertical">
@@ -164,6 +166,7 @@ const OptionCreator = () => {
           {/* Date Picker */}
           <Form.Item label="Expiration Date">
             <DatePicker
+              
               onChange={(date) => setExpirationDate(date?.toDate())}
               showTime={false}
               style={{ width: '100%' }}
@@ -173,7 +176,7 @@ const OptionCreator = () => {
           <Button
             type="primary"
             onClick={handleCreateOption}
-            disabled={!account.address || !collateral || !consideration || !strikePrice || !expirationDate}
+            disabled={!isConnected || !collateral || !consideration || !strikePrice || !expirationDate}
             block
           >
               Create Option

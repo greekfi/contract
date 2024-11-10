@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { InputNumber, Button, Card, Space, message } from 'antd';
-import { parseUnits } from 'viem';
+import { Address, parseUnits } from 'viem';
 import LongOptionABI from '../../contracts/artifacts/LongOption_metadata.json';
 import TokenBalance from './optionTokenBalance';
+import erc20abi from './erc20.abi.json';
 
 const longAbi = LongOptionABI.output.abi;
 
@@ -30,6 +31,18 @@ const RedeemInterface = ({
   const { data: decimals } = useReadContract({
     address: longOptionAddress,
     abi: longAbi,
+    functionName: 'decimals',
+  });
+
+  const { data: collateralAddress } = useReadContract({
+    address: longOptionAddress,
+    abi: longAbi,
+    functionName: 'collateralAddress',
+  });
+
+  const { data: collateralDecimals } = useReadContract({
+    address: collateralAddress as `0x${string}`,
+    abi: erc20abi,
     functionName: 'decimals',
   });
 
@@ -63,8 +76,9 @@ const RedeemInterface = ({
       <Space direction="vertical" style={{ width: '100%' }}>
         <TokenBalance
           userAddress={userAddress}
-          tokenAddress={longOptionAddress}
+          tokenAddress={longOptionAddress as Address}
           label="Your Token Balance"
+          decimals={collateralDecimals as number}
           watch={true}
         />
 

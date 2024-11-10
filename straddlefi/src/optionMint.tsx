@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { InputNumber, Button, Card, Space, message } from 'antd';
-import { parseUnits } from 'viem';
+import { Address, parseUnits } from 'viem';
 
 // Import ABIs and addresses
 import LongOptionABI from '../../contracts/artifacts/LongOption_metadata.json';
@@ -10,58 +10,48 @@ import TokenBalance from './optionTokenBalance';
 
 const longAbi = LongOptionABI.output.abi;
 
-const addressA = "0xca81e41A3eDF50Ed0DF26B89DD7696eE61f4631a";
-console.log(addressA);
 
-const MintInterface = ({
-  longOptionAddress,
-}: {
-  longOptionAddress: `0x${string}`;
-}) => {
+const MintInterface = (
+  {optionAddress, collateralAddress, collateralDecimals, isExpired}: 
+  {optionAddress: Address, collateralAddress: Address, collateralDecimals: number, isExpired: boolean}) => {
+
+
   const [amount, setAmount] = useState(0);
   const [isMinting, setIsMinting] = useState(false);
   const { address: userAddress } = useAccount();
 
 
-  const { data: collateralAddress } = useReadContract({
-    address: longOptionAddress, 
+  const { data: shortOptionAddress } = useReadContract({
+    address: optionAddress as `0x${string}`, 
     abi: longAbi,
-    functionName: 'collateralAddress',
-  });
-  console.log("collateralAddress");
-  console.log(collateralAddress);
-
-
-  const { data: collateralDecimals  } = useReadContract({
-    address: collateralAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'decimals',
-  });
-  console.log("collateralDecimals");
-  console.log(collateralDecimals?.toString());
-
-  // Check if contract is expired
-  const { data: expirationDate } = useReadContract({
-    address: longOptionAddress,
-    abi: longAbi,
-    functionName: 'expirationDate',
+    functionName: 'shortOptionAddress',
+    query: {
+      enabled: !!optionAddress,
+    },
   });
 
-  const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
 
   // Check allowance
   const { data: allowance = 0n } = useReadContract({
     address: collateralAddress as `0x${string}`,
     abi: erc20abi,
     functionName: 'allowance',
-    args: [userAddress],
+    args: [shortOptionAddress as `0x${string}`],
+    query: {
+      enabled: !!collateralAddress,
+    },
   });
+  
+  const amountToMint = parseUnits(amount.toString(), Number(collateralDecimals));
+  const isApproved = (allowance as bigint) >= amountToMint;
 
-  const isApproved = (allowance as bigint) >= parseUnits(amount.toString(), Number(collateralDecimals));
+  console.log("isApproved", isApproved);
+  console.log("allowance", allowance);
+  console.log("amountToMint", amountToMint);
 
   const { writeContract } = useWriteContract();
 
-  const handleMint = async () => {
+  const handleApprove = async () => {
     try {
       setIsMinting(true);
       
@@ -70,16 +60,29 @@ const MintInterface = ({
         address: collateralAddress as `0x${string}`,
         abi: erc20abi,
         functionName: 'approve',
-        args: [longOptionAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
+        args: [shortOptionAddress, amountToMint],
     };
     writeContract(approveCollateral);
+
+      message.success('Collateral approved successfully!');
+    } catch (error) {
+      message.error('Failed to mint options');
+      console.error(error);
+    } finally {
+      setIsMinting(false);
+    }
+  };
+  const handleMint = async () => {
+    try {
+      handleApprove();
       
       // Then mint
       const mintConfig = {
-        address: longOptionAddress,
+        address: optionAddress as `0x${string}`,
         abi: longAbi,
         functionName: 'mint',
-        args: [parseUnits(amount.toString(), Number(collateralDecimals))],
+        args: [amountToMint],
+
       };
       
       writeContract(mintConfig);
@@ -95,17 +98,20 @@ const MintInterface = ({
   return (
     <Card title="Mint Options">
       <Space direction="vertical" style={{ width: '100%' }}>
+
         <Space style={{ width: '100%', justifyContent: 'space-between' }}>
           <TokenBalance
             userAddress={userAddress as `0x${string}`}
-            tokenAddress={longOptionAddress}
+            tokenAddress={optionAddress as `0x${string}`}
             label="Your Option Balance"
+            decimals={collateralDecimals as number}
             watch={true}
           />
           <TokenBalance
             userAddress={userAddress as `0x${string}`}
             tokenAddress={collateralAddress as `0x${string}`}
             label="Your Collateral Balance"
+            decimals={collateralDecimals as number}
             watch={true}
           />
         </Space>
@@ -119,6 +125,14 @@ const MintInterface = ({
         />
 
         <Space>
+          <Button 
+            type="primary"
+            onClick={handleApprove}
+            loading={isMinting}
+            disabled={!amount || isMinting || isApproved || isExpired}
+          >
+            Approve Collateral
+          </Button>
           <Button 
             type="primary"
             onClick={handleMint}
