@@ -33,7 +33,7 @@ const TokenBalance = ({
     if (!decimals) {
       decimals = decimals_ as number;
     }
-    console.log("decimals", decimals);
+    // console.log("decimals", decimals);
       
     const { data: name = '' } = useReadContract({
       address: tokenAddress as Address,

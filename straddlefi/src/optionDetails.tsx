@@ -7,9 +7,9 @@ const longAbi = LongOptionABI.output.abi;
 
 
 
-const ReadContract = (
-  {optionAddress, setCollateralAddress, setConsiderationAddress, setCollateralDecimals, setConsiderationDecimals, setIsExpired}: 
-  {optionAddress: Address, setCollateralAddress: (address: Address) => void, setConsiderationAddress: (address: Address) => void, setCollateralDecimals: (decimals: number) => void, setConsiderationDecimals: (decimals: number) => void, setIsExpired: (isExpired: boolean) => void}) => {
+const ContractDetails = (
+  {optionAddress, setShortAddress, setCollateralAddress, setConsiderationAddress, setCollateralDecimals, setConsiderationDecimals, setIsExpired}: 
+  {optionAddress: Address, setShortAddress: (address: Address) => void, setCollateralAddress: (address: Address) => void, setConsiderationAddress: (address: Address) => void, setCollateralDecimals: (decimals: number) => void, setConsiderationDecimals: (decimals: number) => void, setIsExpired: (isExpired: boolean) => void}) => {
   const { address } = useAccount();
 
   const { data: balance } = useReadContract({
@@ -78,6 +78,17 @@ const { data: expirationDate } = useReadContract({
 const isExpired = expirationDate ? (Date.now() / 1000) > (expirationDate as number): false;
 setIsExpired(isExpired);
 
+const { data: shortAddress } = useReadContract({
+  address: optionAddress,
+  abi: longAbi,
+  functionName: 'shortOptionAddress',
+  query: {
+      enabled: !!optionAddress,
+  },
+});
+console.log("shortAddress", shortAddress);
+setShortAddress(shortAddress as Address);
+
 
 
 
@@ -88,4 +99,4 @@ setIsExpired(isExpired);
   )
 }
 
-export default ReadContract;
+export default ContractDetails;

@@ -8,7 +8,7 @@ import { Account } from './account';
 import { WalletOptions } from './walletoptions';
 import OptionCreator from './optionCreate';
 import { Address } from 'viem';
-import ReadContract from './sample';
+import ContractDetails from './optionDetails';
 import { Collapse, CollapseProps,  } from 'antd';
 import { useState } from 'react';
 import SelectOptionAddress from './optionGetAll';
@@ -26,6 +26,7 @@ function OptionsFunctions() {
   console.log(config);
 
   const [optionAddress, setOptionAddress] = useState<Address>("0x0");
+  const [shortAddress, setShortAddress] = useState<Address>("0x0");
   const [collateralAddress, setCollateralAddress] = useState<Address>("0x0");
   const [considerationAddress, setConsiderationAddress] = useState<Address>("0x0");
   const [collateralDecimals, setCollateralDecimals] = useState<number>(0);
@@ -42,7 +43,7 @@ function OptionsFunctions() {
       {
         key: '2',
         label: 'Exercise',
-        children: <ExerciseInterface optionAddress={optionAddress} collateralAddress={collateralAddress} considerationAddress={considerationAddress} collateralDecimals={collateralDecimals} considerationDecimals={considerationDecimals} isExpired={isExpired} />,
+        children: <ExerciseInterface optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} considerationAddress={considerationAddress} collateralDecimals={collateralDecimals} considerationDecimals={considerationDecimals} isExpired={isExpired} />,
       },
       {
         key: '3',
@@ -59,8 +60,9 @@ function OptionsFunctions() {
     <OptionCreator />
     
     <SelectOptionAddress setOptionAddress={setOptionAddress}  />
-    <ReadContract 
+    <ContractDetails 
     optionAddress={optionAddress} 
+    setShortAddress={setShortAddress}
     setCollateralAddress={setCollateralAddress} 
     setConsiderationAddress={setConsiderationAddress} 
     setCollateralDecimals={setCollateralDecimals}

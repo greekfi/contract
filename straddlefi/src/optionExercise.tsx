@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { InputNumber, Button, Card, Space, message } from 'antd';
 import { parseUnits } from 'viem';
+// import { useWriteContracts } from 'wagmi/experimental';
 
 // Import ABIs and addresses
 import LongOptionABI from '../../contracts/artifacts/LongOption_metadata.json';
@@ -15,6 +16,7 @@ console.log(addressA);
 
 const ExerciseInterface = ({
   optionAddress,
+  shortAddress,
   collateralAddress,
   considerationAddress,
   collateralDecimals,
@@ -22,6 +24,7 @@ const ExerciseInterface = ({
   isExpired,
 }: {
   optionAddress: `0x${string}`;
+  shortAddress: `0x${string}`;
   collateralAddress: `0x${string}`;
   considerationAddress: `0x${string}`;
   collateralDecimals: number;
@@ -30,40 +33,18 @@ const ExerciseInterface = ({
 }) => {
   const [amount, setAmount] = useState(0);
   const { address: userAddress } = useAccount();
-  const [isExercising, setIsExercising] = useState(false);
 
   // Check allowance
-  const { data: allowance = 0n } = useReadContract({
-    address: considerationAddress as `0x${string}`,
-    abi: erc20abi,
-    functionName: 'allowance',
-    args: [userAddress, optionAddress],
-  });
+  // const { data: allowance = 0n } = useReadContract({
+  //   address: considerationAddress as `0x${string}`,
+  //   abi: erc20abi,
+  //   functionName: 'allowance',
+  //   args: [userAddress, optionAddress],
+  // });
 
-  const isApproved = (allowance as bigint) >= parseUnits(amount.toString(), Number(considerationDecimals));
-
-  const { writeContract } = useWriteContract();
+  const { writeContract, error, isPending } = useWriteContract();
 
   const handleExercise = async () => {
-    try {
-      setIsExercising(true);
-      
-      // First approve if needed
-        const approveConsideration = {
-          address: considerationAddress as `0x${string}`,
-          abi: erc20abi,
-          functionName: 'approve',
-          args: [optionAddress, parseUnits(amount.toString(), Number(considerationDecimals))],
-      };
-      writeContract(approveConsideration);
-      const approveCollateral = {
-        address: collateralAddress as `0x${string}`,
-        abi: erc20abi,
-        functionName: 'approve',
-        args: [optionAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
-    };
-    writeContract(approveCollateral);
-      
       // Then exercise
       const exerciseConfig = {
         address: optionAddress,
@@ -73,13 +54,31 @@ const ExerciseInterface = ({
       };
       
       writeContract(exerciseConfig);
+
+  };
+
+  const approveTransfers = async () => {
+      
+      // First approve if needed
+        const approveConsideration = {
+          address: considerationAddress as `0x${string}`,
+          abi: erc20abi,
+          functionName: 'approve',
+          args: [shortAddress, parseUnits(amount.toString(), Number(considerationDecimals))],
+      };
+      writeContract(approveConsideration);
+      const approveCollateral = {
+        address: collateralAddress as `0x${string}`,
+        abi: erc20abi,
+        functionName: 'approve',
+        args: [shortAddress, parseUnits(amount.toString(), Number(collateralDecimals))],
+    };
+    writeContract(approveCollateral);
+      
+      // Then exercise
+      console.log(error);
       message.success('Options exercised successfully!');
-    } catch (error) {
-      message.error('Failed to exercise options');
-      console.error(error);
-    } finally {
-      setIsExercising(false);
-    }
+
   };
 
   return (
@@ -113,13 +112,25 @@ const ExerciseInterface = ({
         <Space>
           <Button 
             type="primary"
+            onClick={approveTransfers}
+            loading={isPending}
+            disabled={!amount  || isExpired}
+          >
+            Approve Transfers
+          </Button>
+        </Space>
+        
+        <Space>
+          <Button 
+            type="primary"
             onClick={handleExercise}
-            loading={isExercising}
-            disabled={!amount || !isApproved || isExercising || isExpired}
+            loading={isPending}
+            disabled={!amount  || isExpired}
           >
             Exercise Options
           </Button>
         </Space>
+        
       </Space>
     </Card>
   );
