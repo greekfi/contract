@@ -38,7 +38,7 @@ function OptionsFunctions() {
       {
         key: '1',
         label: 'Mint',
-        children: <MintInterface optionAddress={optionAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
+        children: <MintInterface optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
       },
       {
         key: '2',
@@ -48,7 +48,7 @@ function OptionsFunctions() {
       {
         key: '3',
         label: 'Redeem',
-        children: <RedeemInterface optionAddress={optionAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
+        children: <RedeemInterface  optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
       },
     ];
 

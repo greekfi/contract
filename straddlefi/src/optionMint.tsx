@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import { InputNumber, Button, Card, Space, message } from 'antd';
+import { InputNumber, Button, Card, Space } from 'antd';
 import { Address, parseUnits } from 'viem';
 
 // Import ABIs and addresses
@@ -12,70 +12,44 @@ const longAbi = LongOptionABI.output.abi;
 
 
 const MintInterface = (
-  {optionAddress, collateralAddress, collateralDecimals, isExpired}: 
-  {optionAddress: Address, collateralAddress: Address, collateralDecimals: number, isExpired: boolean}) => {
+  {optionAddress, shortAddress, collateralAddress, collateralDecimals, isExpired}: 
+  {optionAddress: Address, shortAddress: Address, collateralAddress: Address, collateralDecimals: number, isExpired: boolean}) => {
 
 
   const [amount, setAmount] = useState(0);
-  const [isMinting, setIsMinting] = useState(false);
   const { address: userAddress } = useAccount();
-
-
-  const { data: shortOptionAddress } = useReadContract({
-    address: optionAddress as `0x${string}`, 
-    abi: longAbi,
-    functionName: 'shortOptionAddress',
-    query: {
-      enabled: !!optionAddress,
-    },
-  });
-
+  const amountToMint = parseUnits(amount.toString(), Number(collateralDecimals));
+  const { writeContract, isPending } = useWriteContract();
 
   // Check allowance
   const { data: allowance = 0n } = useReadContract({
     address: collateralAddress as `0x${string}`,
     abi: erc20abi,
     functionName: 'allowance',
-    args: [shortOptionAddress as `0x${string}`],
+    args: [shortAddress as `0x${string}`],
     query: {
       enabled: !!collateralAddress,
     },
   });
   
-  const amountToMint = parseUnits(amount.toString(), Number(collateralDecimals));
   const isApproved = (allowance as bigint) >= amountToMint;
 
   console.log("isApproved", isApproved);
   console.log("allowance", allowance);
   console.log("amountToMint", amountToMint);
 
-  const { writeContract } = useWriteContract();
-
   const handleApprove = async () => {
-    try {
-      setIsMinting(true);
-      
-      // First approve if needed
       const approveCollateral = {
         address: collateralAddress as `0x${string}`,
         abi: erc20abi,
         functionName: 'approve',
-        args: [shortOptionAddress, amountToMint],
+        args: [shortAddress, amountToMint],
     };
     writeContract(approveCollateral);
 
-      message.success('Collateral approved successfully!');
-    } catch (error) {
-      message.error('Failed to mint options');
-      console.error(error);
-    } finally {
-      setIsMinting(false);
-    }
   };
   const handleMint = async () => {
-    try {
       handleApprove();
-      
       // Then mint
       const mintConfig = {
         address: optionAddress as `0x${string}`,
@@ -86,13 +60,6 @@ const MintInterface = (
       };
       
       writeContract(mintConfig);
-      message.success('Options minted successfully!');
-    } catch (error) {
-      message.error('Failed to mint options');
-      console.error(error);
-    } finally {
-      setIsMinting(false);
-    }
   };
 
   return (
@@ -128,16 +95,16 @@ const MintInterface = (
           <Button 
             type="primary"
             onClick={handleApprove}
-            loading={isMinting}
-            disabled={!amount || isMinting || isApproved || isExpired}
+            loading={isPending}
+            disabled={!amount || isPending || isApproved || isExpired}
           >
             Approve Collateral
           </Button>
           <Button 
             type="primary"
             onClick={handleMint}
-            loading={isMinting}
-            disabled={!amount || isMinting || isApproved || isExpired}
+            loading={isPending}
+            disabled={!amount || isPending || isApproved || isExpired}
           >
             Mint Options
           </Button>

@@ -8,16 +8,11 @@ import OptionFactoryABI from '../../contracts/artifacts/OptionFactory_metadata.j
 
 const abi = OptionFactoryABI.output.abi;
 
-
 const SelectOptionAddress = ({setOptionAddress}: {setOptionAddress: (address: Address) => void}) => {
 
     const useOption = (optionAddress: string) => {
-
         setOptionAddress(optionAddress as Address);
-
-
       };
-
 
   const { data: createdOptions, error } = useReadContract({
     address: "0x0dc40778e46d701209b809e7f3716673df3c4ebc", 
@@ -27,11 +22,10 @@ const SelectOptionAddress = ({setOptionAddress}: {setOptionAddress: (address: Ad
   console.log("createdOptions", createdOptions);
   console.log("error", error);
 
-
-  return (
-            <Select onChange={useOption} options={ (createdOptions as Address[] || []).map((option) => ({label: option, value: option}))}></Select>
-         
-  );
+  return (<Select 
+    onChange={useOption} 
+    options={ (createdOptions as Address[] || []).map((option) => ({label: option, value: option}))}
+    />);
 };
 
 export default SelectOptionAddress;
