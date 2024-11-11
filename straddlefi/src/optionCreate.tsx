@@ -4,6 +4,7 @@ import { Select, Input, Switch, DatePicker, Button, Space, Form, Card } from 'an
 import { Address } from 'viem';
 import tokenList from './tokenList.json';
 import moment from 'moment-timezone';
+import TokenBalance from './optionTokenBalance';
 
 const CONTRACT_ADDRESS = '0x0dc40778e46d701209b809e7f3716673df3c4ebc'
 
@@ -32,7 +33,7 @@ interface Token {
 }
 
 const OptionCreator = () => {
-  const {isConnected} = useAccount();  
+  const {isConnected, address: userAddress} = useAccount();  
 
   // State management
   const [collateralTokenSymbol, setCollateralToken] = useState<Token>();
@@ -107,6 +108,17 @@ const OptionCreator = () => {
     <Card className="max-w-2xl mx-auto">
       <Form layout="vertical">
         <Space direction="vertical" style={{ width: '100%' }} size="large">
+
+        <Space>
+        <TokenBalance
+            userAddress={userAddress as `0x${string}`}
+            tokenAddress={collateralTokenSymbol?.address as `0x${string}`}
+            label="Your Collateral Balance"
+            decimals={collateralTokenSymbol?.decimals as number}
+            watch={true}
+          />
+
+        </Space>
           {/* Token Selection */}
           <Space style={{ width: '100%' }} size="large">
             <Form.Item

@@ -1,5 +1,5 @@
 import { useReadContract } from 'wagmi';
-import { Select } from 'antd';
+import { Select, Card, Space } from 'antd';
 import { Address } from 'viem';
 
 
@@ -22,10 +22,19 @@ const SelectOptionAddress = ({setOptionAddress}: {setOptionAddress: (address: Ad
   console.log("createdOptions", createdOptions);
   console.log("error", error);
 
-  return (<Select 
+  return (
+    <Card title="Select Option">
+    <Space direction="vertical" style={{ width: '100%' }}>
+
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+  <Select 
     onChange={useOption} 
     options={ (createdOptions as Address[] || []).map((option) => ({label: option, value: option}))}
-    />);
+    />
+    </Space>
+    </Space>
+    </Card>
+  );
 };
 
 export default SelectOptionAddress;
