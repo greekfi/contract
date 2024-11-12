@@ -253,8 +253,8 @@ contract LongOption is OptionBase {
         if (shortOption.balanceOf(msg.sender) < amount) revert InsufficientBalance();
 
         address contractHolder = msg.sender;
-        shortOption.redeemPair(contractHolder, amount);
         _burn(contractHolder, amount);
+        shortOption.redeemPair(contractHolder, amount);
     }
 }
 

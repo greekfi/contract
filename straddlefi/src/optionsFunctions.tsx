@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAccount, WagmiProvider } from 'wagmi'
 import { config } from './config'
-import RedeemInterface from './optionRedeemPair';
+import RedeemPair from './optionRedeemPair';
 import ExerciseInterface from './optionExercise';
 import MintInterface from './optionMint';
 import { Account } from './account';
@@ -13,6 +13,7 @@ import { Collapse, CollapseProps,  } from 'antd';
 import { useState } from 'react';
 import SelectOptionAddress from './optionGetAll';
 
+const CONTRACT_ADDRESS = '0x2c4de7ddd385fa62a12cadf76672f8f3399184fd'
 const queryClient = new QueryClient()
 
 function ConnectWallet() {
@@ -48,7 +49,7 @@ function OptionsFunctions() {
       {
         key: '3',
         label: 'Redeem',
-        children: <RedeemInterface  optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
+        children: <RedeemPair  optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
       },
     ];
 
@@ -57,9 +58,9 @@ function OptionsFunctions() {
     <WagmiProvider config={config}>
     <QueryClientProvider client={queryClient}>
     <ConnectWallet />     
-    <OptionCreator />
+    <OptionCreator baseContractAddress={CONTRACT_ADDRESS} />
     
-    <SelectOptionAddress setOptionAddress={setOptionAddress}  />
+    <SelectOptionAddress baseContractAddress={CONTRACT_ADDRESS}      setOptionAddress={setOptionAddress}  />
     <ContractDetails 
     optionAddress={optionAddress} 
     setShortAddress={setShortAddress}

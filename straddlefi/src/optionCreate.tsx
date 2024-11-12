@@ -6,7 +6,6 @@ import tokenList from './tokenList.json';
 import moment from 'moment-timezone';
 import TokenBalance from './optionTokenBalance';
 
-const CONTRACT_ADDRESS = '0x0dc40778e46d701209b809e7f3716673df3c4ebc'
 
 const abi = [
   {
@@ -32,7 +31,10 @@ interface Token {
   decimals: number;
 }
 
-const OptionCreator = () => {
+const OptionCreator = (
+  {baseContractAddress}: 
+  {baseContractAddress: Address}
+) => {
   const {isConnected, address: userAddress} = useAccount();  
 
   // State management
@@ -83,7 +85,7 @@ const OptionCreator = () => {
     try {
       console.log(name, symbol, collateral.address, consideration.address, BigInt(expTimestamp), strikeInteger, isPut);
       writeContract({
-        address: CONTRACT_ADDRESS,
+        address: baseContractAddress,
         abi,
         functionName: 'createOption',
         args: [

@@ -16,8 +16,8 @@ interface RedeemInterfaceProps {
   isExpired: boolean;
 }
 
-const RedeemInterface = ({
-  optionAddress,
+const RedeemPair = ({
+  optionAddress: longOption,
   shortAddress,
   collateralAddress,
   collateralDecimals,
@@ -43,18 +43,19 @@ const RedeemInterface = ({
 };
 
   const handleRedeem = async () => {
-    await approveTransfers();
+    // await approveTransfers();
 
       // Prepare redeem transaction
       const redeemConfig = {
-        address: optionAddress,
+        address: longOption,
         abi: longAbi,
         functionName: 'redeem',
         args: [parseUnits(amount.toString(), collateralDecimals)],
+        account: userAddress as `0x${string}`,
       };
 
       writeContract(redeemConfig);
-      console.log(isExpired);
+      console.log(error);
   };
 
 
@@ -63,7 +64,7 @@ const RedeemInterface = ({
       <Space direction="vertical" style={{ width: '100%' }}>
       <TokenBalance
           userAddress={userAddress as `0x${string}`}
-          tokenAddress={optionAddress as Address}
+          tokenAddress={longOption as Address}
           label="Your Long Balance"
           decimals={collateralDecimals as number}
           watch={true}
@@ -86,6 +87,15 @@ const RedeemInterface = ({
 
         <Button 
           type="primary"
+          onClick={approveTransfers}
+          loading={isPending}
+          disabled={!amount || isExpired}
+        >
+          Approve Transfers
+        </Button>
+
+        <Button 
+          type="primary"
           onClick={handleRedeem}
           loading={isPending}
           // disabled={!amount || isExpired}
@@ -97,4 +107,4 @@ const RedeemInterface = ({
   );
 };
 
-export default RedeemInterface;
+export default RedeemPair;

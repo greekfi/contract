@@ -49,7 +49,7 @@ const MintInterface = (
 
   };
   const handleMint = async () => {
-      handleApprove();
+      // handleApprove();
       // Then mint
       const mintConfig = {
         address: optionAddress as `0x${string}`,

@@ -9,7 +9,6 @@ const longAbi = LongOptionABI.output.abi;
 
 
 interface RedeemInterfaceProps {
-  optionAddress: `0x${string}`;
   shortAddress: `0x${string}`;
   collateralAddress: `0x${string}`;
   collateralDecimals: number;
@@ -17,7 +16,6 @@ interface RedeemInterfaceProps {
 }
 
 const RedeemInterface = ({
-  optionAddress,
   shortAddress,
   collateralAddress,
   collateralDecimals,
@@ -47,10 +45,10 @@ const RedeemInterface = ({
 
       // Prepare redeem transaction
       const redeemConfig = {
-        address: optionAddress,
+        address: shortAddress,
         abi: longAbi,
         functionName: 'redeem',
-        args: [parseUnits(amount.toString(), collateralDecimals)],
+        args: [userAddress as `0x${string}`, parseUnits(amount.toString(), collateralDecimals)],
       };
 
       writeContract(redeemConfig);
@@ -61,13 +59,6 @@ const RedeemInterface = ({
   return (
     <Card title="Redeem Collateral">
       <Space direction="vertical" style={{ width: '100%' }}>
-      <TokenBalance
-          userAddress={userAddress as `0x${string}`}
-          tokenAddress={optionAddress as Address}
-          label="Your Long Balance"
-          decimals={collateralDecimals as number}
-          watch={true}
-        />
       <TokenBalance
           userAddress={userAddress as `0x${string}`}
           tokenAddress={shortAddress as Address}
@@ -88,7 +79,8 @@ const RedeemInterface = ({
           type="primary"
           onClick={handleRedeem}
           loading={isPending}
-          // disabled={!amount || isExpired}
+          disabled={!amount || !isExpired}
+          
         >
           Redeem Collateral
         </Button>

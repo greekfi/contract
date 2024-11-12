@@ -14,7 +14,7 @@ export const config = createConfig({
     // mainnet, 
     sepolia],
   transports: {
-    // [mainnet.id]: http(),
-    [sepolia.id]: http("https://ethereum-sepolia-rpc.publicnode.com"),
+        // [mainnet.id]: http(), https://rpc.sepolia.dev
+        [sepolia.id]: http("https://endpoints.omniatech.io/v1/eth/sepolia/public"),
   },
 })
