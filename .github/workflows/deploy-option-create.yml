@@ -28,6 +28,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Change directory
+        run: cd straddlefi
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set up Node
