@@ -9,9 +9,11 @@ import { WalletOptions } from './walletoptions';
 import OptionCreator from './optionCreate';
 import { Address } from 'viem';
 import ContractDetails from './optionDetails';
-import { Collapse, CollapseProps,  } from 'antd';
+import { Collapse, CollapseProps, Flex, Layout, Image, Menu  } from 'antd';
 import { useState } from 'react';
 import SelectOptionAddress from './optionGetAll';
+import { Content } from 'antd/es/layout/layout';
+import Link from 'antd/es/typography/Link';
 
 const CONTRACT_ADDRESS = '0x2c4de7ddd385fa62a12cadf76672f8f3399184fd'
 const queryClient = new QueryClient()
@@ -54,26 +56,75 @@ function OptionsFunctions() {
     ];
 
     return (
+      <Layout>
+        <Content>
+          
+          <Flex
+            vertical
+            gap="middle"
+            style={{
+              maxWidth: '1200px',
+              margin: '0 auto',
+              padding: '24px',
+              minHeight: '100vh'
+            }}
+          >
+            <Menu mode="horizontal" style={{ display: 'flex', justifyContent: 'left', width: '100%' }} >
+              <Menu.Item>
+                <Image src="src/assets/straddle-logo-v1.svg" alt="Straddle.fi" style={{ width: '40px', height: '40px' }} preview={false} />
+              </Menu.Item>
+              <Menu.Item>
+                  <Link href="/whitepaper">About Straddle</Link>
+              </Menu.Item>
 
-    <WagmiProvider config={config}>
-    <QueryClientProvider client={queryClient}>
-    <ConnectWallet />     
-    <OptionCreator baseContractAddress={CONTRACT_ADDRESS} />
-    
-    <SelectOptionAddress baseContractAddress={CONTRACT_ADDRESS}      setOptionAddress={setOptionAddress}  />
-    <ContractDetails 
-    optionAddress={optionAddress} 
-    setShortAddress={setShortAddress}
-    setCollateralAddress={setCollateralAddress} 
-    setConsiderationAddress={setConsiderationAddress} 
-    setCollateralDecimals={setCollateralDecimals}
-    setConsiderationDecimals={setConsiderationDecimals}
-    setIsExpired={setIsExpired}
-    />
-    <Collapse items={items} defaultActiveKey={['1']} />;
-    </QueryClientProvider>
-    </WagmiProvider>
-    )
-}
+              <Menu.Item>
+                  <Link href="/whitepaper">Whitepaper</Link>
+              </Menu.Item>
 
-export default OptionsFunctions;
+
+              <Menu.Item>
+                  <Link href="/contact">Contact</Link>
+              </Menu.Item>
+            </Menu>
+            <Image src="src/assets/straddle-logo-v1.svg" alt="Straddle.fi" style={{ width: '100px', height: '100px' }} preview={false} />
+            <WagmiProvider config={config}>
+              <QueryClientProvider client={queryClient}>
+                {/* Each child in its own div to maintain vertical flow */}
+                <div><ConnectWallet /></div>
+                
+                <div><OptionCreator baseContractAddress={CONTRACT_ADDRESS} /></div>
+                
+                <div>
+                  <SelectOptionAddress 
+                    baseContractAddress={CONTRACT_ADDRESS} 
+                    setOptionAddress={setOptionAddress} 
+                  />
+                </div>
+                
+                <div>
+                  <ContractDetails 
+                    optionAddress={optionAddress}
+                    setShortAddress={setShortAddress}
+                    setCollateralAddress={setCollateralAddress}
+                    setConsiderationAddress={setConsiderationAddress}
+                    setCollateralDecimals={setCollateralDecimals}
+                    setConsiderationDecimals={setConsiderationDecimals}
+                    setIsExpired={setIsExpired}
+                  />
+                </div>
+                
+                <div>
+                  <Collapse 
+                    items={items} 
+                    defaultActiveKey={['1']} 
+                  />
+                </div>
+              </QueryClientProvider>
+            </WagmiProvider>
+          </Flex>
+        </Content>
+      </Layout>
+    );
+  }
+  
+  export default OptionsFunctions;

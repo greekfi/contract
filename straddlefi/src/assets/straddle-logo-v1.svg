@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Hexagonal border -->
+  <polygon 
+    points="
+      100,20 
+      170,60 
+      170,140 
+      100,180 
+      30,140 
+      30,60" 
+    fill="#f8f9fa" 
+    stroke="#1a365d" 
+    stroke-width="2"/>
+  
+  <!-- S-curve -->
+  <path d="M 65,100 C 85,130 115,70 135,100" 
+        fill="none" 
+        stroke="#2b6cb0" 
+        stroke-width="6"
+        stroke-linecap="round"/>
+        
+  <!-- Main dots -->
+  <circle cx="65" cy="100" r="6" fill="#1a365d"/>
+  <circle cx="135" cy="100" r="6" fill="#1a365d"/>
+  
+  <!-- Right dot lines to hexagon corners -->
+  <line x1="135" y1="100" 
+        x2="170" y2="60" 
+        stroke="#1a365d" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+  <line x1="135" y1="100" 
+        x2="170" y2="140" 
+        stroke="#1a365d" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+        
+  <!-- Left dot lines to hexagon corners -->
+  <line x1="65" y1="100" 
+        x2="30" y2="140" 
+        stroke="#1a365d" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+  <line x1="65" y1="100" 
+        x2="30" y2="60" 
+        stroke="#1a365d" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+        
+  <!-- Corner dots -->
+  <circle cx="170" cy="60" r="5" fill="#1a365d"/>
+  <circle cx="170" cy="140" r="5" fill="#1a365d"/>
+  <circle cx="30" cy="140" r="5" fill="#1a365d"/>
+  <circle cx="30" cy="60" r="5" fill="#1a365d"/>
+</svg>
