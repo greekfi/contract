@@ -12,7 +12,7 @@ import ContractDetails from './optionDetails';
 import { Collapse, CollapseProps, Flex, Layout, Image, Menu  } from 'antd';
 import { useState } from 'react';
 import SelectOptionAddress from './optionGetAll';
-import { Content } from 'antd/es/layout/layout';
+import { Content, Footer } from 'antd/es/layout/layout';
 import Link from 'antd/es/typography/Link';
 import logo from './assets/straddle-logo-v1.svg';
 
@@ -39,6 +39,11 @@ function OptionsFunctions() {
 
 
     const items: CollapseProps['items'] = [
+      {
+        key: '0',
+        label: 'Create New Option',
+        children: <OptionCreator baseContractAddress={CONTRACT_ADDRESS} />,
+      },
       {
         key: '1',
         label: 'Mint',
@@ -75,7 +80,7 @@ function OptionsFunctions() {
                 <Image src={logo} alt="Straddle.fi" style={{ width: '40px', height: '40px' }} preview={false} />
               </Menu.Item>
               <Menu.Item>
-                  <Link href="https://hello.straddle.fi">About Straddle</Link>
+                  <Link href="#about">About Straddle</Link>
               </Menu.Item>
 
               <Menu.Item>
@@ -84,23 +89,22 @@ function OptionsFunctions() {
 
 
               <Menu.Item>
-                  <Link href="/contact">Contact</Link>
+                  <Link href="mailto:hello@straddle.fi">Contact</Link>
               </Menu.Item>
             </Menu>
             <Image src={logo} alt="Straddle.fi" style={{ width: '100px', height: '100px' }} preview={false} />
+
             <WagmiProvider config={config}>
               <QueryClientProvider client={queryClient}>
                 {/* Each child in its own div to maintain vertical flow */}
                 <div><ConnectWallet /></div>
-                
-                <div><OptionCreator baseContractAddress={CONTRACT_ADDRESS} /></div>
-                
                 <div>
                   <SelectOptionAddress 
                     baseContractAddress={CONTRACT_ADDRESS} 
                     setOptionAddress={setOptionAddress} 
                   />
                 </div>
+                
                 
                 <div>
                   <ContractDetails 
@@ -123,6 +127,17 @@ function OptionsFunctions() {
               </QueryClientProvider>
             </WagmiProvider>
           </Flex>
+
+          <Footer>
+            <div>
+              <p>
+                Straddle.fi provides the only option protocol on Ethereum that collateralizes any 
+              ERC20 token to a redeemable token and provides a fully on-chain option that is exercisable. 
+              Both the collateral and the option are ERC20 tokens. 
+              </p>
+            </div>
+            <span>Straddle.fi © 2024</span>
+          </Footer>
         </Content>
       </Layout>
     );
