@@ -38,6 +38,7 @@ function OptionsFunctions() {
   const [isExpired, setIsExpired] = useState<boolean>(false);
 
 
+
     const items: CollapseProps['items'] = [
       {
         key: '0',
@@ -46,16 +47,21 @@ function OptionsFunctions() {
       },
       {
         key: '1',
+        label: 'Select Option',
+        children: <SelectOptionAddress baseContractAddress={CONTRACT_ADDRESS} setOptionAddress={setOptionAddress} />,
+      },
+      {
+        key: '2',
         label: 'Mint',
         children: <MintInterface optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
       },
       {
-        key: '2',
+        key: '3',
         label: 'Exercise',
         children: <ExerciseInterface optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} considerationAddress={considerationAddress} collateralDecimals={collateralDecimals} considerationDecimals={considerationDecimals} isExpired={isExpired} />,
       },
       {
-        key: '3',
+        key: '4',
         label: 'Redeem',
         children: <RedeemPair  optionAddress={optionAddress} shortAddress={shortAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} isExpired={isExpired} />,
       },
@@ -98,12 +104,6 @@ function OptionsFunctions() {
               <QueryClientProvider client={queryClient}>
                 {/* Each child in its own div to maintain vertical flow */}
                 <div><ConnectWallet /></div>
-                <div>
-                  <SelectOptionAddress 
-                    baseContractAddress={CONTRACT_ADDRESS} 
-                    setOptionAddress={setOptionAddress} 
-                  />
-                </div>
                 
                 
                 <div>
