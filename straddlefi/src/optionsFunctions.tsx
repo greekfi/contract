@@ -129,7 +129,7 @@ function OptionsFunctions() {
           </Flex>
 
           <Footer>
-            <div>
+            <div id="about">
               <p>
                 Straddle.fi provides the only option protocol on Ethereum that collateralizes any 
               ERC20 token to a redeemable token and provides a fully on-chain option that is exercisable. 
