@@ -14,6 +14,7 @@ import { useState } from 'react';
 import SelectOptionAddress from './optionGetAll';
 import { Content } from 'antd/es/layout/layout';
 import Link from 'antd/es/typography/Link';
+import logo from './assets/straddle-logo-v1.svg';
 
 const CONTRACT_ADDRESS = '0x2c4de7ddd385fa62a12cadf76672f8f3399184fd'
 const queryClient = new QueryClient()
@@ -71,14 +72,14 @@ function OptionsFunctions() {
           >
             <Menu mode="horizontal" style={{ display: 'flex', justifyContent: 'left', width: '100%' }} >
               <Menu.Item>
-                <Image src="src/assets/straddle-logo-v1.svg" alt="Straddle.fi" style={{ width: '40px', height: '40px' }} preview={false} />
+                <Image src={logo} alt="Straddle.fi" style={{ width: '40px', height: '40px' }} preview={false} />
               </Menu.Item>
               <Menu.Item>
-                  <Link href="/whitepaper">About Straddle</Link>
+                  <Link href="https://hello.straddle.fi">About Straddle</Link>
               </Menu.Item>
 
               <Menu.Item>
-                  <Link href="/whitepaper">Whitepaper</Link>
+                  <Link href="https://github.com/straddle-fi/whitepaper">Whitepaper</Link>
               </Menu.Item>
 
 
@@ -86,7 +87,7 @@ function OptionsFunctions() {
                   <Link href="/contact">Contact</Link>
               </Menu.Item>
             </Menu>
-            <Image src="src/assets/straddle-logo-v1.svg" alt="Straddle.fi" style={{ width: '100px', height: '100px' }} preview={false} />
+            <Image src={logo} alt="Straddle.fi" style={{ width: '100px', height: '100px' }} preview={false} />
             <WagmiProvider config={config}>
               <QueryClientProvider client={queryClient}>
                 {/* Each child in its own div to maintain vertical flow */}
