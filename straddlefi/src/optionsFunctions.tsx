@@ -16,7 +16,7 @@ import { Content, Footer } from 'antd/es/layout/layout';
 import Link from 'antd/es/typography/Link';
 import logo from './assets/straddle-logo-v1.svg';
 
-const CONTRACT_ADDRESS = '0x2c4de7ddd385fa62a12cadf76672f8f3399184fd'
+const CONTRACT_ADDRESS = '0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B'
 const queryClient = new QueryClient()
 
 function ConnectWallet() {
@@ -36,7 +36,6 @@ function OptionsFunctions() {
   const [collateralDecimals, setCollateralDecimals] = useState<number>(0);
   const [considerationDecimals, setConsiderationDecimals] = useState<number>(0);
   const [isExpired, setIsExpired] = useState<boolean>(false);
-
 
 
     const items: CollapseProps['items'] = [
