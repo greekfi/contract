@@ -34,6 +34,7 @@ const MintInterface = (
   
   const isApproved = (allowance as bigint) >= amountToMint;
 
+  console.log("shortAddress", shortAddress);
   console.log("isApproved", isApproved);
   console.log("allowance", allowance);
   console.log("amountToMint", amountToMint);
@@ -49,7 +50,7 @@ const MintInterface = (
 
   };
   const handleMint = async () => {
-      // handleApprove();
+      handleApprove();
       // Then mint
       const mintConfig = {
         address: optionAddress as `0x${string}`,

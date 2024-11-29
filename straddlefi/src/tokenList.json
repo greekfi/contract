@@ -29,7 +29,13 @@
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "symbol": "WETH",
       "decimals": 18
+    },
+    {
+      "address": "0xDfa556856B77dA71F70D56C9fD1Ef4Dd891FF131",
+      "symbol": "WBTCt",
+      "decimals": 18
     }
+    
   ],
   "consideration": [
     {

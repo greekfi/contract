@@ -22,7 +22,7 @@ const ContractDetails = (
   const { data: collateralAddress } = useReadContract({
     address: optionAddress as `0x${string}`, 
     abi: longAbi,
-    functionName: 'collateralAddress',
+    functionName: 'collateral',
     query: {
         enabled: !!optionAddress,
     },
@@ -34,12 +34,12 @@ setCollateralAddress(collateralAddress as Address);
 const { data: considerationAddress } = useReadContract({
   address: optionAddress as `0x${string}`, 
   abi: longAbi,
-  functionName: 'considerationAddress',
+  functionName: 'consideration',
   query: {
       enabled: !!optionAddress,
   },
 });
-console.log("considerationAddress", considerationAddress);
+console.log("consideration", considerationAddress);
 setConsiderationAddress(considerationAddress as Address);
 
 
@@ -81,7 +81,7 @@ setIsExpired(isExpired);
 const { data: shortAddress } = useReadContract({
   address: optionAddress,
   abi: longAbi,
-  functionName: 'shortOptionAddress',
+  functionName: 'shortOption',
   query: {
       enabled: !!optionAddress,
   },

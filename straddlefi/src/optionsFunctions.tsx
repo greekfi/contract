@@ -16,7 +16,7 @@ import { Content, Footer } from 'antd/es/layout/layout';
 import Link from 'antd/es/typography/Link';
 import logo from './assets/straddle-logo-v1.svg';
 
-const CONTRACT_ADDRESS = '0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B'
+const CONTRACT_ADDRESS = '0xb55edadc4a09f380cd4229c4075b9f44e3405585'
 const queryClient = new QueryClient()
 
 function ConnectWallet() {

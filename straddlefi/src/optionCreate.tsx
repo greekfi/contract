@@ -6,24 +6,26 @@ import tokenList from './tokenList.json';
 import moment from 'moment-timezone';
 import TokenBalance from './optionTokenBalance';
 
+import Factory from '../../contracts/artifacts/OptionFactory_metadata.json';
+const abi = Factory.output.abi;
 
-const abi = [
-  {
-    inputs: [
-      { internalType: 'string', name: 'name', type: 'string' },
-      { internalType: 'string', name: 'symbol', type: 'string' },
-      { internalType: 'address', name: 'collateralAddress', type: 'address' },
-      { internalType: 'address', name: 'considerationAddress', type: 'address' },
-      { internalType: 'uint256', name: 'expirationDate', type: 'uint256' },
-      { internalType: 'uint256', name: 'strike', type: 'uint256' },
-      { internalType: 'bool', name: 'isPut', type: 'bool' }
-    ],
-    name: 'createOption',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  }
-]
+// const abi = [
+//   {
+//     inputs: [
+//       { internalType: 'string', name: 'name', type: 'string' },
+//       { internalType: 'string', name: 'symbol', type: 'string' },
+//       { internalType: 'address', name: 'collateralAddress', type: 'address' },
+//       { internalType: 'address', name: 'considerationAddress', type: 'address' },
+//       { internalType: 'uint256', name: 'expirationDate', type: 'uint256' },
+//       { internalType: 'uint256', name: 'strike', type: 'uint256' },
+//       { internalType: 'bool', name: 'isPut', type: 'bool' }
+//     ],
+//     name: 'createOption',
+//     outputs: [],
+//     stateMutability: 'nonpayable',
+//     type: 'function'
+//   }
+// ]
 
 interface Token {
   address: string;
@@ -79,18 +81,22 @@ const OptionCreator = (
     // fix time to gmt
     
     // Generate option name and symbol
-    const name = `OPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
-    const symbol = `OPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
+    const longName = `LOPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
+    const longSymbol = `LOPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
+    const shortName = `SOPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
+    const shortSymbol = `SOPT${isPut ? 'P' : 'C'}-${collateral.symbol}-${consideration.symbol}-${fmtDate}-${strikePrice}`;
 
     try {
-      console.log(name, symbol, collateral.address, consideration.address, BigInt(expTimestamp), strikeInteger, isPut);
+      console.log(longName, longSymbol, collateral.address, consideration.address, BigInt(expTimestamp), strikeInteger, isPut);
       writeContract({
         address: baseContractAddress,
         abi,
         functionName: 'createOption',
         args: [
-          name,
-          symbol,
+          longName,
+          shortName,
+          longSymbol,
+          shortSymbol,
           collateral.address as Address,
           consideration.address as Address,
           BigInt(expTimestamp),
