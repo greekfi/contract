@@ -47,7 +47,7 @@ function OptionsFunctions() {
       {
         key: '1',
         label: 'Select Option',
-        children: <SelectOptionAddress baseContractAddress={CONTRACT_ADDRESS} setOptionAddress={setOptionAddress} />,
+        children: <SelectOptionAddress baseContractAddress={CONTRACT_ADDRESS} optionAddress={optionAddress} collateralAddress={collateralAddress} collateralDecimals={collateralDecimals} setOptionAddress={setOptionAddress} />,
       },
       {
         key: '2',
