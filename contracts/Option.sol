@@ -84,7 +84,7 @@ contract OptionBase is ERC20, Ownable, ReentrancyGuard {
             // The strike price actually contains the ratio of Consideration
             // over Collateral including the decimals associated. The ratio is 
             // multiplied by 10**18 as is the standard convention. That's why 
-            // we eventually divide by the STRIKE_DECIMALS.
+            // we eventually divide by the STRIKE_DECIMALS. MulDiv?
             return (amount * strike)/ STRIKE_DECIMALS;
         }
 
@@ -264,7 +264,7 @@ contract LongOption is OptionBase {
         shortOption.mint(msg.sender, amount);
     }
 
-    function mint2(uint256 amount, IAllowanceTransfer.PermitDetails calldata permitDetails, bytes calldata signature) public nonReentrant validAmount(amount) notExpired {
+    function mint2(uint256 amount, IAllowanceTransfer.PermitSingle calldata permitDetails, bytes calldata signature) public nonReentrant validAmount(amount) notExpired {
         _mint(msg.sender, amount);
         shortOption.mint2(msg.sender, amount, permitDetails, signature);
     }
@@ -275,7 +275,7 @@ contract LongOption is OptionBase {
         emit Exercise(address(this), msg.sender, amount);
     }
 
-    function exercise2(uint256 amount, IAllowanceTransfer.PermitDetails calldata permitDetails, bytes calldata signature) public notExpired nonReentrant validAmount(amount) {
+    function exercise2(uint256 amount, IAllowanceTransfer.PermitSingle calldata permitDetails, bytes calldata signature) public notExpired nonReentrant validAmount(amount) {
         _burn(msg.sender, amount);
         shortOption.exercise2(msg.sender, amount, permitDetails, signature);
         emit Exercise(address(this), msg.sender, amount);
