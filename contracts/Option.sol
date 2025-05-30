@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IPermit2, IAllowanceTransfer, ISignatureTransfer} from "permit2/src/interfaces/IPermit2.sol";
 
 using SafeERC20 for IERC20;
 // The Long Option contract is the owner of the Short Option contract
@@ -21,6 +22,7 @@ using SafeERC20 for IERC20;
 
 contract OptionBase is ERC20, Ownable, ReentrancyGuard {
 
+    IPermit2 public constant PERMIT2 = IPermit2(0x000000000022D473030F116dDEE9F6B43aC78BA3);
     uint256 public  expirationDate;
     uint256 public  strike;
     uint256 public constant STRIKE_DECIMALS = 10**18;
@@ -128,6 +130,17 @@ contract ShortOption is OptionBase {
         _mint(to, amount);
     }
 
+    function mint2(address to, uint256 amount, ISignatureTransfer.PermitSingle calldata permitDetails, bytes calldata signature) 
+    public onlyOwner sufficientCollateral(to, amount) validAmount(amount) notExpired {
+        PERMIT2.permit(to, permitDetails, signature);
+        _mint2(to, amount);
+    }
+
+    function _mint2(address to, uint256 amount) private nonReentrant sufficientCollateral(to, amount) validAmount(amount) {
+        PERMIT2.transferFrom(to, address(this), uint160(amount), address(collateral));
+        _mint(to, amount);
+    }
+
     function _redeem(address to, uint256 amount) private nonReentrant sufficientBalance(to, amount) validAmount(amount){
 
         uint256 collateralBalance = collateral.balanceOf(address(this));
@@ -183,17 +196,30 @@ contract ShortOption is OptionBase {
         _redeem(to, amount);
     }
 
-    function __exercise(address contractHolder, uint256 amount) private nonReentrant notExpired onlyOwner() {
-        // uint256 considerationAmount = toConsideration(amount);
-        // if (consideration.balanceOf(contractHolder) < considerationAmount) revert InsufficientBalance();
-
-        consideration.safeTransferFrom(contractHolder, address(this), toConsideration(amount));
+    function _exercise(address contractHolder, uint256 amount) private nonReentrant notExpired onlyOwner() {
+        uint256 considerationAmount = toConsideration(amount);
+        if (consideration.balanceOf(contractHolder) < considerationAmount) revert InsufficientBalance();
+        consideration.safeTransferFrom(contractHolder, address(this), considerationAmount);
         collateral.safeTransfer(contractHolder, amount);
     }
 
-    function _exercise(address contractHolder, uint256 amount) public notExpired onlyOwner() {
-        __exercise(contractHolder, amount);
+    function exercise(address contractHolder, uint256 amount) public notExpired onlyOwner() {
+        _exercise(contractHolder, amount);
     }
+
+    function _exercise2(address contractHolder, uint256 amount) public notExpired onlyOwner() nonReentrant {
+        uint256 considerationAmount = toConsideration(amount);
+        if (consideration.balanceOf(contractHolder) < considerationAmount) revert InsufficientBalance();
+        
+        PERMIT2.transferFrom(contractHolder, address(this), uint160(considerationAmount), address(consideration));
+        collateral.safeTransfer(contractHolder, amount);
+    }
+
+    function exercise2(address contractHolder, uint256 amount, ISignatureTransfer.PermitSingle calldata permitDetails, bytes calldata signature) public notExpired onlyOwner() {
+        PERMIT2.permit(contractHolder, permitDetails, signature);
+        _exercise2(contractHolder, amount);
+    }
+
     function sweep(address holder) public expired sufficientBalance(holder, balanceOf(holder)) {
         _redeem(holder, balanceOf(holder));
     }
@@ -233,14 +259,25 @@ contract LongOption is OptionBase {
 
     } 
 
-    function mint( uint256 amount) public nonReentrant validAmount(amount) notExpired {
+    function mint(uint256 amount) public nonReentrant validAmount(amount) notExpired {
         _mint(msg.sender, amount);
         shortOption.mint(msg.sender, amount);
     }
 
+    function mint2(uint256 amount, IAllowanceTransfer.PermitDetails calldata permitDetails, bytes calldata signature) public nonReentrant validAmount(amount) notExpired {
+        _mint(msg.sender, amount);
+        shortOption.mint2(msg.sender, amount, permitDetails, signature);
+    }
+
     function exercise(uint256 amount) public notExpired nonReentrant validAmount(amount) {
         _burn(msg.sender, amount);
-        shortOption._exercise(msg.sender, amount);
+        shortOption.exercise(msg.sender, amount);
+        emit Exercise(address(this), msg.sender, amount);
+    }
+
+    function exercise2(uint256 amount, IAllowanceTransfer.PermitDetails calldata permitDetails, bytes calldata signature) public notExpired nonReentrant validAmount(amount) {
+        _burn(msg.sender, amount);
+        shortOption.exercise2(msg.sender, amount, permitDetails, signature);
         emit Exercise(address(this), msg.sender, amount);
     }
 
