@@ -119,7 +119,7 @@ contract ShortOption is OptionBase {
         longOption = longOption_;
     }
 
-    function mint(address to, uint256 amount) public onlyOwner sufficientCollateral(to, amount) validAmount(amount) {
+    function mint(address to, uint256 amount) public onlyOwner sufficientCollateral(to, amount) validAmount(amount) notExpired {
         __mint(to, amount);
     }
 
@@ -162,10 +162,11 @@ contract ShortOption is OptionBase {
 
     function _redeemConsideration(address to, uint256 amount) private nonReentrant sufficientBalance(to, amount) validAmount(amount){
         // Verify we have enough consideration tokens
-        if (consideration.balanceOf(address(this)) < amount) revert InsufficientBalance();
+        uint256 considerationAmount = toConsideration(amount);
+        if (consideration.balanceOf(address(this)) < considerationAmount) revert InsufficientBalance();
         _burn(to, amount);
         // Transfer consideration tokens for the remaining amount
-        consideration.safeTransfer(to, toConsideration(amount));
+        consideration.safeTransfer(to, considerationAmount);
         emit Redemption(address(longOption), to, amount);
 
     }
@@ -192,6 +193,9 @@ contract ShortOption is OptionBase {
 
     function _exercise(address contractHolder, uint256 amount) public notExpired onlyOwner() {
         __exercise(contractHolder, amount);
+    }
+    function sweep(address holder) public expired sufficientBalance(holder, balanceOf(holder)) {
+        _redeem(holder, balanceOf(holder));
     }
 
 }
@@ -229,7 +233,7 @@ contract LongOption is OptionBase {
 
     } 
 
-    function mint( uint256 amount) public nonReentrant validAmount(amount) {
+    function mint( uint256 amount) public nonReentrant validAmount(amount) notExpired {
         _mint(msg.sender, amount);
         shortOption.mint(msg.sender, amount);
     }
@@ -286,7 +290,7 @@ contract OptionFactory is Ownable {
         bool isPut
         ) public {
         if (collateral == address(0)) revert InvalidValue();
-
+        if (consideration == address(0)) revert InvalidValue();
         if (strike == 0) revert InvalidValue();
         if (expirationDate < block.timestamp) revert InvalidValue();
 
@@ -316,6 +320,7 @@ contract OptionFactory is Ownable {
         allOptions[collateral][expirationDate][strike].push(longOptionAddress);
         shortOption.setLongOption(longOptionAddress);
         shortOption.transferOwnership(longOptionAddress);
+        longOption.transferOwnership(owner());
 
         emit LongOptionCreated(
             longOptionAddress,
